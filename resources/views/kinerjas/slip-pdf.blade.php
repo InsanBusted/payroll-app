@@ -1,0 +1,1 @@
+@include('kinerjas.slip-content')

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeKinerjaController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
@@ -61,10 +62,18 @@ Route::middleware('auth')->group(function () {
 
     // Employee Kinerja
     Route::get('/kinerjas', [App\Http\Controllers\EmployeeKinerjaController::class, 'index'])->name('kinerjas.index');
+    Route::get('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'show'])->name('kinerjas.show');
     Route::post('/kinerjas', [App\Http\Controllers\EmployeeKinerjaController::class, 'store'])->name('kinerjas.store');
     Route::post('/kinerjas/import', [App\Http\Controllers\EmployeeKinerjaController::class, 'importExcel'])->name('kinerjas.import');
     Route::put('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'update'])->name('kinerjas.update');
     Route::delete('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'destroy'])->name('kinerjas.destroy');
+
+    // Slip Gaji - Employee Kinerja
+    Route::get('/kinerjas/{id}/slip', [EmployeeKinerjaController::class, 'slip'])
+        ->name('kinerjas.slip');
+
+    Route::get('/kinerjas/{id}/slip/download', [EmployeeKinerjaController::class, 'downloadSlip'])
+        ->name('kinerjas.slip.download');
 
     // Staff — hanya bisa akses kinerja milik sendiri
     Route::middleware('staff')->group(function () {
@@ -72,4 +81,4 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

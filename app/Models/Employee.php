@@ -16,8 +16,18 @@ class Employee extends Model
         'no_rek_bank',
         'nama_bank',
         'signature_path',
+        'join_date',
         'ptkp_status_id',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($employee) {
+            if (empty($employee->join_date)) {
+                $employee->join_date = now()->toDateString();
+            }
+        });
+    }
 
     public function user(): BelongsTo
     {
@@ -38,7 +48,7 @@ class Employee extends Model
     {
         return $this->hasMany(EmployeeKinerja::class);
     }
-    
+
     public function ptkpStatus()
     {
         return $this->belongsTo(PtkpStatus::class);

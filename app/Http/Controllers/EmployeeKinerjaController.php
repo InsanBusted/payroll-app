@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Imports\EmployeeKinerjaImport;
 use App\Models\Employee;
 use App\Models\EmployeeKinerja;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,7 +22,7 @@ class EmployeeKinerjaController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('employee', function ($eq) use ($search) {
                     $eq->where('nama', 'like', '%' . $search . '%')
-                       ->orWhere('nik', 'like', '%' . $search . '%');
+                        ->orWhere('nik', 'like', '%' . $search . '%');
                 });
             });
 
@@ -34,11 +35,11 @@ class EmployeeKinerjaController extends Controller
         match ($sort) {
             'periode_asc'  => $query->orderBy('periode', 'asc'),
             'nama_asc'     => $query->join('employees', 'employee_kinerjas.employee_id', '=', 'employees.id')
-                                    ->orderBy('employees.nama', 'asc')
-                                    ->select('employee_kinerjas.*'),
+                ->orderBy('employees.nama', 'asc')
+                ->select('employee_kinerjas.*'),
             'nama_desc'    => $query->join('employees', 'employee_kinerjas.employee_id', '=', 'employees.id')
-                                    ->orderBy('employees.nama', 'desc')
-                                    ->select('employee_kinerjas.*'),
+                ->orderBy('employees.nama', 'desc')
+                ->select('employee_kinerjas.*'),
             default        => $query->orderBy('periode', 'desc'),
         };
 
@@ -52,6 +53,14 @@ class EmployeeKinerjaController extends Controller
             ->pluck('periode');
 
         return view('kinerjas.index', compact('kinerjas', 'employees', 'availablePeriodes'));
+    }
+
+    public function show(EmployeeKinerja $kinerja)
+    {
+        $kinerja->load('employee.jabatan', 'employee.area');
+        $rincian = $kinerja->rincianGaji();
+
+        return view('kinerjas.show', compact('kinerja', 'rincian'));
     }
 
     public function store(Request $request)
@@ -169,5 +178,34 @@ class EmployeeKinerjaController extends Controller
         }
 
         return redirect()->route('kinerjas.index')->with('success', $msg);
+    }
+
+    public function slip($id)
+    {
+        $kinerja = EmployeeKinerja::with([
+            'employee',
+            'employee.jabatan',
+            'employee.area'
+        ])->findOrFail($id);
+
+        $rincian = $kinerja->getRincianGaji();
+
+        return view('kinerjas.slip-preview', compact('kinerja', 'rincian'));
+    }
+
+    public function downloadSlip($id)
+    {
+        $kinerja = EmployeeKinerja::with([
+            'employee',
+            'employee.jabatan',
+            'employee.area'
+        ])->findOrFail($id);
+
+        $rincian = $kinerja->getRincianGaji();
+
+        $pdf = Pdf::loadView('kinerjas.slip-pdf', compact('kinerja', 'rincian'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->download('Slip-Gaji-' . $kinerja->employee->nama . '.pdf');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,9 +62,20 @@ class EmployeeKinerja extends Model
         $setting = SettingGaji::query()->first();
         if (!$setting) return 0;
 
-        $potonganBpjstk  = $setting->potongan_bpjstk; // Diinput langsung sebagai nominal rupiah
-        $potonganAbsensi = $this->absensi * $setting->potongan_absensi; // Pengali: Jumlah hari absen dikali setting rate
-        $potonganPph21   = $this->pph21; // Diinput langsung sebagai nominal rupiah
+        $potonganBpjstk = 0;
+
+        if ($this->employee && $this->employee->join_date) {
+            $joinDate = Carbon::parse($this->employee->join_date);
+            $today = Carbon::now();
+
+            // jika sudah lebih dari / sama dengan 3 bulan
+            if ($joinDate->diffInMonths($today) >= 3) {
+                $potonganBpjstk = $setting->potongan_bpjstk;
+            }
+        }
+
+        $potonganAbsensi = $this->absensi * $setting->potongan_absensi;
+        $potonganPph21   = $this->pph21;
 
         return $potonganBpjstk + $potonganAbsensi + $potonganPph21;
     }
@@ -73,6 +85,9 @@ class EmployeeKinerja extends Model
      */
     public function hitungGajiDiterima(): int
     {
+        $totalPendatapan = $this->hitungTotalPendapatan();
+        // dd($totalPendatapan);
+
         return $this->hitungTotalPendapatan() - $this->hitungTotalPotongan();
     }
 
@@ -81,6 +96,16 @@ class EmployeeKinerja extends Model
     {
         $setting = SettingGaji::query()->first();
         if (!$setting) return [];
+
+        $potonganBpjstk = 0;
+
+        if ($this->employee && $this->employee->join_date) {
+            $joinDate = Carbon::parse($this->employee->join_date);
+
+            if ($joinDate->diffInMonths(now()) >= 3) {
+                $potonganBpjstk = $setting->potongan_bpjstk;
+            }
+        }
 
         return [
             'pendapatan' => [
@@ -92,7 +117,7 @@ class EmployeeKinerja extends Model
                 'bonus' => $this->bonus,
             ],
             'potongan' => [
-                'bpjstk' => $this->bpjstk,
+                'bpjstk' => $potonganBpjstk,
                 'absensi' => $this->absensi * $setting->potongan_absensi,
                 'pph21' => $this->pph21,
             ]
