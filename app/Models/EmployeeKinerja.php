@@ -34,7 +34,7 @@ class EmployeeKinerja extends Model
      */
     public function hitungTotalPendapatan(): int
     {
-        $setting = SettingGaji::first();
+        $setting = SettingGaji::query()->first();
         if (!$setting) return 0;
 
         $gajiPokok = $this->total_hadir * $setting->rate_gaji_pokok;
@@ -51,14 +51,14 @@ class EmployeeKinerja extends Model
      * Diasumsikan absensi dan bpjstk yang diinput adalah nominal / jumlah yang akan dikalikan dengan setting?
      * User: "BPJSTK = 50.000", "absensi = 10.000".
      * Mari asumsikan $this->bpjstk dan $this->absensi adalah jumlah pengali, atau jika user mengisi nominal langsung di kinerja:
-     * Jika field 'bpjstk' di database berisi 1, maka potongannya 1 * 50.000. 
+     * Jika field 'bpjstk' di database berisi 1, maka potongannya 1 * 50.000.
      * Jika field 'bpjstk' di database sudah nominal (50.000), maka tidak perlu dikali setting.
      * Mengacu ke "Gaji Pokok = 30.000 x total hadir (25)", mungkin potongan_absensi = 10.000 x absensi (hari).
      * PPh21 diinput nominal langsung.
      */
     public function hitungTotalPotongan(): int
     {
-        $setting = SettingGaji::first();
+        $setting = SettingGaji::query()->first();
         if (!$setting) return 0;
 
         $potonganBpjstk  = $setting->potongan_bpjstk; // Diinput langsung sebagai nominal rupiah
@@ -79,7 +79,7 @@ class EmployeeKinerja extends Model
     // Rincian untuk ditampilkan di slip:
     public function rincianGaji(): array
     {
-        $setting = SettingGaji::first();
+        $setting = SettingGaji::query()->first();
         if (!$setting) return [];
 
         return [

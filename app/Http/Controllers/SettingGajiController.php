@@ -10,7 +10,7 @@ class SettingGajiController extends Controller
     public function index()
     {
         // Ambil setting gaji pertama, jika tidak ada, buat dengan nilai default
-        $setting = SettingGaji::first() ?? SettingGaji::create([
+        $setting = SettingGaji::query()->first() ?? SettingGaji::create([
             'rate_gaji_pokok' => 30000,
             'rate_tunjangan_groom' => 10000,
             'rate_srp' => 30000,

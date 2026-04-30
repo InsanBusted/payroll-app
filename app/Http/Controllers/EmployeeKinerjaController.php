@@ -2,23 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\EmployeeKinerjaImport;
 use App\Models\Employee;
 use App\Models\EmployeeKinerja;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeKinerjaController extends Controller
 {
     public function index(Request $request)
     {
-        $kinerjas = EmployeeKinerja::with('employee')
-            ->orderBy('periode', 'desc')
-            ->latest()
-            ->paginate(10);
-            
-        $employees = Employee::orderBy('nama')->get();
+        $search  = $request->input('search');
+        $periode = $request->input('periode');
+        $sort    = $request->input('sort', 'periode_desc'); // default: periode terbaru
 
-        return view('kinerjas.index', compact('kinerjas', 'employees'));
+        $query = EmployeeKinerja::with('employee')
+            ->when($search, function ($q) use ($search) {
+                $q->whereHas('employee', function ($eq) use ($search) {
+                    $eq->where('nama', 'like', '%' . $search . '%')
+                       ->orWhere('nik', 'like', '%' . $search . '%');
+                });
+            });
+
+        // Filter by periode (format YYYY-MM)
+        if ($periode) {
+            $query->where('periode', $periode);
+        }
+
+        // Sort
+        match ($sort) {
+            'periode_asc'  => $query->orderBy('periode', 'asc'),
+            'nama_asc'     => $query->join('employees', 'employee_kinerjas.employee_id', '=', 'employees.id')
+                                    ->orderBy('employees.nama', 'asc')
+                                    ->select('employee_kinerjas.*'),
+            'nama_desc'    => $query->join('employees', 'employee_kinerjas.employee_id', '=', 'employees.id')
+                                    ->orderBy('employees.nama', 'desc')
+                                    ->select('employee_kinerjas.*'),
+            default        => $query->orderBy('periode', 'desc'),
+        };
+
+        $kinerjas  = $query->paginate(10)->withQueryString();
+        $employees = Employee::orderBy('nama', 'asc')->get();
+
+        // Daftar periode yang ada di DB untuk dropdown filter
+        $availablePeriodes = EmployeeKinerja::select('periode')
+            ->distinct()
+            ->orderBy('periode', 'desc')
+            ->pluck('periode');
+
+        return view('kinerjas.index', compact('kinerjas', 'employees', 'availablePeriodes'));
     }
 
     public function store(Request $request)
@@ -31,7 +64,7 @@ class EmployeeKinerjaController extends Controller
                 'max:7', // YYYY-MM
                 Rule::unique('employee_kinerjas')->where(function ($query) use ($request) {
                     return $query->where('employee_id', $request->employee_id)
-                                 ->where('periode', $request->periode);
+                        ->where('periode', $request->periode);
                 }),
             ],
             'total_hadir'     => 'required|integer|min:0',
@@ -73,7 +106,7 @@ class EmployeeKinerjaController extends Controller
                 'max:7',
                 Rule::unique('employee_kinerjas')->where(function ($query) use ($request) {
                     return $query->where('employee_id', $request->employee_id)
-                                 ->where('periode', $request->periode);
+                        ->where('periode', $request->periode);
                 })->ignore($kinerja->id),
             ],
             'total_hadir'     => 'required|integer|min:0',
@@ -107,9 +140,34 @@ class EmployeeKinerjaController extends Controller
 
     public function destroy(EmployeeKinerja $kinerja)
     {
-        $kinerja->delete();
+        $kinerja->delete($kinerja->id);
 
         return redirect()->route('kinerjas.index')
             ->with('success', 'Data kinerja berhasil dihapus.');
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'periode' => 'required|string|max:7',
+            'file'    => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ], [
+            'file.required' => 'File Excel wajib diunggah.',
+            'file.mimes'    => 'Format file harus .xlsx, .xls, atau .csv.',
+            'periode.required' => 'Periode wajib dipilih.',
+        ]);
+
+        $import = new EmployeeKinerjaImport($request->periode);
+        Excel::import($import, $request->file('file'));
+
+        $msg = "Import selesai: {$import->importedCount} data baru, {$import->updatedCount} diperbarui, {$import->skippedCount} dilewati.";
+
+        if (!empty($import->errors)) {
+            $errorList = implode(' | ', array_slice($import->errors, 0, 5));
+            return redirect()->route('kinerjas.index')
+                ->with('warning', $msg . ' Peringatan: ' . $errorList);
+        }
+
+        return redirect()->route('kinerjas.index')->with('success', $msg);
     }
 }

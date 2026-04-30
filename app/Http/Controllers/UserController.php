@@ -15,7 +15,14 @@ class UserController extends Controller
         $users = User::with('role')->latest()->paginate(10);
         $roles = Role::all();
 
-        return view('users.index', compact('users', 'roles'));
+        // Stats
+        $user = User::with('role')->get();
+
+        $totalUser   = $user->count();
+        $linkedUser  = $user->whereNotNull('role_id')->count();
+        $unlinkedUser= $user->whereNull('role_id')->count();
+
+        return view('users.index', compact('users', 'roles', 'totalUser', 'linkedUser', 'unlinkedUser'));
     }
 
     public function store(Request $request)
@@ -61,7 +68,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $user->delete();
+        $user->delete($user->id);
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }

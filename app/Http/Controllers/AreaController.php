@@ -18,10 +18,10 @@ class AreaController extends Controller
     {
         $request->validate([
             'nama'     => 'required|string|max:100|unique:areas,nama',
-            'deskripsi'=> 'nullable|string|max:255',
+            'deskripsi' => 'nullable|string|max:255',
         ]);
 
-        Area::create($request->only('nama', 'deskripsi'));
+        Area::create($request->only(['nama', 'deskripsi']));
 
         return redirect()->route('areas.index')
             ->with('success', 'Area "' . $request->nama . '" berhasil ditambahkan.');
@@ -31,10 +31,10 @@ class AreaController extends Controller
     {
         $request->validate([
             'nama'     => ['required', 'string', 'max:100', Rule::unique('areas')->ignore($area->id)],
-            'deskripsi'=> 'nullable|string|max:255',
+            'deskripsi' => 'nullable|string|max:255',
         ]);
 
-        $area->update($request->only('nama', 'deskripsi'));
+        $area->update($request->only(['nama', 'deskripsi']));
 
         return redirect()->route('areas.index')
             ->with('success', 'Area "' . $area->nama . '" berhasil diperbarui.');
@@ -47,7 +47,7 @@ class AreaController extends Controller
                 ->with('error', 'Area "' . $area->nama . '" tidak dapat dihapus karena masih digunakan oleh ' . $area->employees()->count() . ' karyawan.');
         }
 
-        $area->delete();
+        $area->delete($area->id);
 
         return redirect()->route('areas.index')
             ->with('success', 'Area berhasil dihapus.');

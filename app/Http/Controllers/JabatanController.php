@@ -21,7 +21,7 @@ class JabatanController extends Controller
             'deskripsi'=> 'nullable|string|max:255',
         ]);
 
-        Jabatan::create($request->only('nama', 'deskripsi'));
+        Jabatan::create($request->only(['nama', 'deskripsi']));
 
         return redirect()->route('jabatans.index')
             ->with('success', 'Jabatan "' . $request->nama . '" berhasil ditambahkan.');
@@ -34,7 +34,7 @@ class JabatanController extends Controller
             'deskripsi'=> 'nullable|string|max:255',
         ]);
 
-        $jabatan->update($request->only('nama', 'deskripsi'));
+        $jabatan->update($request->only(['nama', 'deskripsi']));
 
         return redirect()->route('jabatans.index')
             ->with('success', 'Jabatan "' . $jabatan->nama . '" berhasil diperbarui.');
@@ -47,7 +47,7 @@ class JabatanController extends Controller
                 ->with('error', 'Jabatan "' . $jabatan->nama . '" tidak dapat dihapus karena masih digunakan oleh ' . $jabatan->employees()->count() . ' karyawan.');
         }
 
-        $jabatan->delete();
+        $jabatan->delete($jabatan->id);
 
         return redirect()->route('jabatans.index')
             ->with('success', 'Jabatan berhasil dihapus.');

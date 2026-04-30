@@ -16,6 +16,7 @@ class Employee extends Model
         'no_rek_bank',
         'nama_bank',
         'signature_path',
+        'ptkp_status_id',
     ];
 
     public function user(): BelongsTo
@@ -36,5 +37,10 @@ class Employee extends Model
     public function kinerjas()
     {
         return $this->hasMany(EmployeeKinerja::class);
+    }
+    
+    public function ptkpStatus()
+    {
+        return $this->belongsTo(PtkpStatus::class);
     }
 }

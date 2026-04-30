@@ -19,6 +19,8 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/employee', [ProfileController::class, 'updateEmployee'])->name('profile.employee');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // User Management — superadmin only
@@ -60,8 +62,14 @@ Route::middleware('auth')->group(function () {
     // Employee Kinerja
     Route::get('/kinerjas', [App\Http\Controllers\EmployeeKinerjaController::class, 'index'])->name('kinerjas.index');
     Route::post('/kinerjas', [App\Http\Controllers\EmployeeKinerjaController::class, 'store'])->name('kinerjas.store');
+    Route::post('/kinerjas/import', [App\Http\Controllers\EmployeeKinerjaController::class, 'importExcel'])->name('kinerjas.import');
     Route::put('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'update'])->name('kinerjas.update');
     Route::delete('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'destroy'])->name('kinerjas.destroy');
+
+    // Staff — hanya bisa akses kinerja milik sendiri
+    Route::middleware('staff')->group(function () {
+        Route::get('/staff/kinerja', [App\Http\Controllers\StaffKinerjaController::class, 'index'])->name('staff.kinerja');
+    });
 });
 
 require __DIR__.'/auth.php';

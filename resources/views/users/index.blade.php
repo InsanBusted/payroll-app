@@ -23,7 +23,7 @@
             </div>
             <div>
                 <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total User</p>
-                <p class="text-2xl font-extrabold text-slate-800">{{ $users->total() }}</p>
+                <p class="text-2xl font-extrabold text-slate-800">{{ $totalUser }}</p>
             </div>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4">
@@ -32,7 +32,7 @@
             </div>
             <div>
                 <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Dengan Role</p>
-                <p class="text-2xl font-extrabold text-slate-800">{{ $users->getCollection()->whereNotNull('role_id')->count() }}</p>
+                <p class="text-2xl font-extrabold text-slate-800">{{ $linkedUser }}</p>
             </div>
         </div>
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4">
@@ -41,7 +41,7 @@
             </div>
             <div>
                 <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Tanpa Role</p>
-                <p class="text-2xl font-extrabold text-slate-800">{{ $users->getCollection()->whereNull('role_id')->count() }}</p>
+                <p class="text-2xl font-extrabold text-slate-800">{{ $unlinkedUser }}</p>
             </div>
         </div>
     </div>

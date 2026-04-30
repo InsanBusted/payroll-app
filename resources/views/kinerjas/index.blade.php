@@ -1,6 +1,30 @@
 <x-app-layout>
     <x-slot name="title">Kinerja Karyawan</x-slot>
 
+    {{-- Flash Messages --}}
+    @if (session('success'))
+        <div id="flash-success" class="mb-4 flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl px-4 py-3">
+            <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>{{ session('success') }}</span>
+            <button onclick="document.getElementById('flash-success').remove()" class="ml-auto text-emerald-400 hover:text-emerald-700">&times;</button>
+        </div>
+    @endif
+    @if (session('warning'))
+        <div id="flash-warning" class="mb-4 flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3">
+            <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            <span>{{ session('warning') }}</span>
+            <button onclick="document.getElementById('flash-warning').remove()" class="ml-auto text-amber-400 hover:text-amber-700">&times;</button>
+        </div>
+    @endif
+    @if ($errors->any())
+        <div class="mb-4 flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">
+            <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- Stats --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
         <div class="bg-white rounded-2xl border border-slate-200 p-6 flex items-center gap-4 shadow-sm">
@@ -18,6 +42,79 @@
         </div>
     </div>
 
+    {{-- Import Excel Card --}}
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="font-bold text-slate-800 text-sm">Import Data Kinerja dari Excel</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Upload file Excel (.xlsx / .xls) dengan kolom: NIK Karyawan, Total Hadir, Tunj. Groom, SRP, GROSIR, AKSESORIS, BONUS, Absensi</p>
+            </div>
+        </div>
+        <div class="px-6 py-5">
+            <form method="POST" action="{{ route('kinerjas.import') }}" enctype="multipart/form-data"
+                  class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+                @csrf
+                {{-- Dropdown Pilih Bulan --}}
+                <div class="flex-shrink-0">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Periode Bulan</label>
+                    <select name="periode" required
+                        class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition min-w-[180px]">
+                        <option value="">— Pilih Bulan —</option>
+                        @php
+                            $months = [
+                                '01' => 'Januari',  '02' => 'Februari', '03' => 'Maret',
+                                '04' => 'April',    '05' => 'Mei',      '06' => 'Juni',
+                                '07' => 'Juli',     '08' => 'Agustus',  '09' => 'September',
+                                '10' => 'Oktober',  '11' => 'November', '12' => 'Desember',
+                            ];
+                            $currentYear  = date('Y');
+                            $currentMonth = date('m');
+                        @endphp
+                        @foreach ($months as $num => $label)
+                            @php $val = $currentYear . '-' . $num; @endphp
+                            <option value="{{ $val }}" {{ $currentMonth == $num ? 'selected' : '' }}>
+                                {{ $label }} {{ $currentYear }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Upload File --}}
+                <div class="flex-1 w-full">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">File Excel</label>
+                    <div class="relative">
+                        <input type="file" name="file" id="excel-file" accept=".xlsx,.xls,.csv" required
+                            onchange="updateFileName(this)"
+                            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+                        <div id="file-label"
+                            class="flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-500 hover:border-emerald-400 hover:bg-emerald-50 transition-colors cursor-pointer">
+                            <svg class="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span id="file-name-text">Klik untuk pilih file Excel...</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Submit --}}
+                <div class="flex-shrink-0">
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm whitespace-nowrap">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        Import Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Table --}}
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -27,9 +124,90 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                Tambah Kinerja
+                Tambah Manual
             </button>
         </div>
+
+        {{-- Filter Bar --}}
+        <form method="GET" action="{{ route('kinerjas.index') }}"
+              class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+
+            {{-- Search --}}
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Cari Nama / NIK</label>
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+                    </svg>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Nama atau NIK karyawan..."
+                        class="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+                </div>
+            </div>
+
+            {{-- Filter Periode --}}
+            <div class="flex-shrink-0">
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Periode</label>
+                <select name="periode"
+                    class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[170px]">
+                    <option value="">— Semua Periode —</option>
+                    @foreach ($availablePeriodes as $p)
+                        @php
+                            [$y, $m] = explode('-', $p);
+                            $bulan = ['','Januari','Februari','Maret','April','Mei','Juni',
+                                      'Juli','Agustus','September','Oktober','November','Desember'];
+                        @endphp
+                        <option value="{{ $p }}" {{ request('periode') == $p ? 'selected' : '' }}>
+                            {{ $bulan[(int)$m] }} {{ $y }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Sort --}}
+            <div class="flex-shrink-0">
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Urutkan</label>
+                <select name="sort"
+                    class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[170px]">
+                    <option value="periode_desc" {{ request('sort','periode_desc') == 'periode_desc' ? 'selected' : '' }}>Periode Terbaru</option>
+                    <option value="periode_asc"  {{ request('sort') == 'periode_asc'  ? 'selected' : '' }}>Periode Terlama</option>
+                    <option value="nama_asc"     {{ request('sort') == 'nama_asc'     ? 'selected' : '' }}>Nama A → Z</option>
+                    <option value="nama_desc"    {{ request('sort') == 'nama_desc'    ? 'selected' : '' }}>Nama Z → A</option>
+                </select>
+            </div>
+
+            {{-- Tombol --}}
+            <div class="flex gap-2 flex-shrink-0">
+                <button type="submit"
+                    class="inline-flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                    Filter
+                </button>
+                @if(request('search') || request('periode') || request('sort'))
+                    <a href="{{ route('kinerjas.index') }}"
+                        class="inline-flex items-center gap-1.5 border border-slate-300 text-slate-600 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+
+        {{-- Result info --}}
+        @if(request('search') || request('periode'))
+            <div class="px-6 py-2 bg-indigo-50 border-b border-indigo-100 text-xs text-indigo-700 font-medium">
+                Menampilkan {{ $kinerjas->total() }} hasil
+                @if(request('search')) untuk <strong>"{{ request('search') }}"</strong>@endif
+                @if(request('periode'))
+                    @php [$y,$m] = explode('-', request('periode')); $bl=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; @endphp
+                    periode <strong>{{ $bl[(int)$m] }} {{ $y }}</strong>
+                @endif
+            </div>
+        @endif
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -331,5 +509,18 @@
         @if ($errors->any())
             openModal('create-modal');
         @endif
+
+        // Update label nama file yang dipilih
+        function updateFileName(input) {
+            const label = document.getElementById('file-name-text');
+            if (input.files && input.files[0]) {
+                label.textContent = input.files[0].name;
+                label.classList.add('text-emerald-700', 'font-semibold');
+            } else {
+                label.textContent = 'Klik untuk pilih file Excel...';
+                label.classList.remove('text-emerald-700', 'font-semibold');
+            }
+        }
     </script>
+
 </x-app-layout>

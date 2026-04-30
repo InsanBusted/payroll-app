@@ -25,7 +25,7 @@ class RoleController extends Controller
             'name.regex' => 'Role name must be lowercase letters and underscores only (e.g. finance, hr_manager).',
         ]);
 
-        Role::create($request->only('name', 'display_name', 'description'));
+        Role::create($request->only(['name', 'display_name', 'description']));
 
         return redirect()->route('roles.index')->with('success', 'Role "' . $request->display_name . '" created successfully.');
     }
@@ -40,7 +40,7 @@ class RoleController extends Controller
             'name.regex' => 'Role name must be lowercase letters and underscores only.',
         ]);
 
-        $role->update($request->only('name', 'display_name', 'description'));
+        $role->update($request->only(['name', 'display_name', 'description']));
 
         return redirect()->route('roles.index')->with('success', 'Role "' . $role->display_name . '" updated successfully.');
     }
@@ -52,7 +52,7 @@ class RoleController extends Controller
                 ->with('error', 'Cannot delete "' . $role->display_name . '" — ' . $role->users()->count() . ' user(s) are still assigned to this role.');
         }
 
-        $role->delete();
+        $role->delete($role->id);
 
         return redirect()->route('roles.index')->with('success', 'Role deleted successfully.');
     }
