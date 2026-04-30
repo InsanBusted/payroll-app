@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="title">Dashboard</x-slot>
+    <x-slot name="title">Dashboard cholis gaji</x-slot>
 
     @if(Auth::user()->hasRole('staff'))
 
