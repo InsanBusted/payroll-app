@@ -78,6 +78,8 @@ Route::middleware('auth')->group(function () {
     // Staff — hanya bisa akses kinerja milik sendiri
     Route::middleware('staff')->group(function () {
         Route::get('/staff/kinerja', [App\Http\Controllers\StaffKinerjaController::class, 'index'])->name('staff.kinerja');
+        Route::get('/staff/kinerja/{id}/slip', [App\Http\Controllers\StaffKinerjaController::class, 'slip'])->name('staff.kinerja.slip');
+        Route::get('/staff/kinerja/{id}/slip/download', [App\Http\Controllers\StaffKinerjaController::class, 'downloadSlip'])->name('staff.kinerja.slip.download');
     });
 });
 

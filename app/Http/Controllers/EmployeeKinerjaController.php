@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Imports\EmployeeKinerjaImport;
 use App\Models\Employee;
 use App\Models\EmployeeKinerja;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmployeeKinerjaController extends Controller
 {
@@ -16,7 +16,7 @@ class EmployeeKinerjaController extends Controller
     {
         $search  = $request->input('search');
         $periode = $request->input('periode');
-        $sort    = $request->input('sort', 'periode_desc'); // default: periode terbaru
+        $sort    = $request->input('sort', 'periode_desc');
 
         $query = EmployeeKinerja::with('employee')
             ->when($search, function ($q) use ($search) {
@@ -188,7 +188,7 @@ class EmployeeKinerjaController extends Controller
             'employee.area'
         ])->findOrFail($id);
 
-        $rincian = $kinerja->getRincianGaji();
+        $rincian = $kinerja->rincianGaji();
 
         return view('kinerjas.slip-preview', compact('kinerja', 'rincian'));
     }
@@ -201,7 +201,7 @@ class EmployeeKinerjaController extends Controller
             'employee.area'
         ])->findOrFail($id);
 
-        $rincian = $kinerja->getRincianGaji();
+        $rincian = $kinerja->rincianGaji();
 
         $pdf = Pdf::loadView('kinerjas.slip-pdf', compact('kinerja', 'rincian'))
             ->setPaper('A4', 'portrait');

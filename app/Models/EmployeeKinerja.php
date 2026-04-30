@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeKinerja extends Model
 {
@@ -33,6 +34,7 @@ class EmployeeKinerja extends Model
     /**
      * Hitung total pendapatan kotor berdasarkan setting gaji aktif.
      */
+
     public function hitungTotalPendapatan(): int
     {
         $setting = SettingGaji::query()->first();
@@ -45,6 +47,61 @@ class EmployeeKinerja extends Model
         $valueAksesoris = $this->aksesoris * $setting->rate_aksesoris;
 
         return $gajiPokok + $tunjanganKerapihan + $valueSrp + $valueGrosir + $valueAksesoris + $this->bonus;
+    }
+
+    // untuk hitung total pph21
+    public function hitungTotalPph21(): int
+    {
+        $setting = SettingGaji::query()->first();
+        if (!$setting) return 0;
+        $totalPendapatan = $this->hitungTotalPendapatan();
+
+        $hasilAkhir = $totalPendapatan;
+        $statusPtkp = Auth::user()->employee?->ptkpStatus;
+        $rate = TerRate::query()->where('category_id', $statusPtkp?->category_id)
+            ->where('min_salary', '<=', $hasilAkhir)
+            ->where(function ($q) use ($hasilAkhir) {
+                $q->where('max_salary', '>=', $hasilAkhir)
+                    ->orWhereNull('max_salary');
+            })
+            ->first();
+
+        $pph21 = $hasilAkhir * ($rate?->rate / 100);
+
+        return $pph21;
+    }
+
+    // untuk list di table
+    public function hitungListPph21($employeeId): int
+    {
+        $setting = SettingGaji::query()->first();
+        if (!$setting) {
+            return 0;
+        }
+
+        $employee = Employee::with('ptkpStatus')->find($employeeId);
+        if (!$employee || !$employee->ptkpStatus) {
+            return 0;
+        }
+
+
+        $hasilAkhir = $this->hitungTotalPendapatan();
+        $rate = TerRate::query()
+            ->where('category_id', $employee->ptkpStatus->category_id)
+            ->where('min_salary', '<=', $hasilAkhir)
+            ->where(function ($q) use ($hasilAkhir) {
+                $q->where('max_salary', '>=', $hasilAkhir)
+                    ->orWhereNull('max_salary');
+            })
+            ->first();
+
+        if (!$rate) {
+            return 0;
+        }
+
+
+
+        return $hasilAkhir * ($rate->rate / 100);
     }
 
     /**
@@ -75,7 +132,7 @@ class EmployeeKinerja extends Model
         }
 
         $potonganAbsensi = $this->absensi * $setting->potongan_absensi;
-        $potonganPph21   = $this->pph21;
+        $potonganPph21   = $this->hitungTotalPph21();
 
         return $potonganBpjstk + $potonganAbsensi + $potonganPph21;
     }
@@ -83,11 +140,18 @@ class EmployeeKinerja extends Model
     /**
      * Hitung gaji bersih yang diterima.
      */
+    public function hitungGajiDiterimaList(): int
+    {
+        $employeeId = $this->employee->id;
+
+        $gaji = $this->hitungTotalPendapatan()
+            - $this->hitungListPph21($employeeId);
+
+        return $gaji - $this->hitungTotalPotongan();
+    }
+
     public function hitungGajiDiterima(): int
     {
-        $totalPendatapan = $this->hitungTotalPendapatan();
-        // dd($totalPendatapan);
-
         return $this->hitungTotalPendapatan() - $this->hitungTotalPotongan();
     }
 
@@ -119,7 +183,7 @@ class EmployeeKinerja extends Model
             'potongan' => [
                 'bpjstk' => $potonganBpjstk,
                 'absensi' => $this->absensi * $setting->potongan_absensi,
-                'pph21' => $this->pph21,
+                'pph21' => $this->hitungTotalPph21(),
             ]
         ];
     }

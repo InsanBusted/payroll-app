@@ -39,6 +39,11 @@
                         {{ $kinerja->employee->area->nama }}
                     </span>
                 @endif
+                @if ($kinerja->employee->ptkpStatus)
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-700">PTKP:
+                        {{ $kinerja->employee->ptkpStatus->status }}</span>
+                @endif
             </div>
         </div>
 
@@ -67,11 +72,6 @@
             <p class="text-sm text-slate-400 mt-1">{{ $y }}</p>
         </div>
     </div>
-
-    <a href="{{ route('kinerjas.slip', $kinerja->id) }}" target="_blank"
-        class="px-3 py-2 bg-green-500 text-white rounded-xl text-sm">
-        Preview Slip Gaji
-    </a>
 
     {{-- Summary Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
@@ -156,7 +156,6 @@
                     ],
                     ['label' => 'Bonus', 'value' => 'Rp ' . number_format($kinerja->bonus, 0, ',', '.')],
                     ['label' => 'Absen / Telat', 'value' => $kinerja->absensi . ' hari'],
-                    ['label' => 'PPh 21', 'value' => 'Rp ' . number_format($kinerja->pph21, 0, ',', '.')],
                 ];
             @endphp
             <div class="divide-y divide-slate-100">
@@ -244,7 +243,7 @@
                 <div class="border-t border-slate-100 bg-slate-50 px-6 py-3.5 flex items-center justify-between">
                     <span class="text-sm font-semibold text-slate-700">Gaji Bersih Diterima</span>
                     <span class="text-base font-extrabold text-indigo-600 tabular-nums">
-                        Rp {{ number_format($kinerja->hitungGajiDiterima(), 0, ',', '.') }}
+                        Rp {{ number_format($kinerja->hitungGajiDiterimaList(), 0, ',', '.') }}
                     </span>
                 </div>
             @else
@@ -276,6 +275,23 @@
             Kembali
         </a>
         <div class="flex items-center gap-2">
+            <a href="{{ route('kinerjas.slip', $kinerja->id) }}" target="_blank"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors border border-emerald-100">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Preview Slip
+            </a>
+            <a href="{{ route('kinerjas.slip.download', $kinerja->id) }}"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-50 text-violet-700 text-xs font-semibold hover:bg-violet-100 transition-colors border border-violet-100">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download PDF
+            </a>
             <button
                 onclick="openEditFromDetail({{ $kinerja->id }}, '{{ $kinerja->employee_id }}', '{{ $kinerja->periode }}', {{ $kinerja->total_hadir }}, {{ $kinerja->tunjangan_groom }}, {{ $kinerja->srp }}, {{ $kinerja->grosir }}, {{ $kinerja->aksesoris }}, {{ $kinerja->bonus }}, {{ $kinerja->bpjstk }}, {{ $kinerja->absensi }}, {{ $kinerja->pph21 }})"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100 transition-colors">
