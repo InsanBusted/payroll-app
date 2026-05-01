@@ -13,9 +13,15 @@ use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $employees = Employee::with(['user', 'jabatan', 'area', 'ptkpStatus'])->latest()->paginate(10);
+        $query = Employee::with(['user', 'jabatan', 'area', 'ptkpStatus'])->latest();
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('nama', 'like', '%' . $request->search . '%');
+        }
+
+        $employees = $query->paginate(10)->withQueryString();
         $jabatans     = Jabatan::orderBy('nama', 'asc')->get();
         $areas        = Area::orderBy('nama', 'asc')->get();
         $ptkpStatuses = PtkpStatus::orderBy('status', 'asc')->get();

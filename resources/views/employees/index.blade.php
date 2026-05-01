@@ -34,13 +34,21 @@
 
     {{-- Table --}}
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 class="font-bold text-slate-800">Daftar Karyawan</h2>
-            <button onclick="openModal('create-modal')"
-                    class="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                Tambah Karyawan
-            </button>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <form action="{{ route('employees.index') }}" method="GET" class="relative flex-1 sm:flex-none">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama karyawan..."
+                           class="w-full sm:w-64 pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition bg-slate-50">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </form>
+                <button onclick="openModal('create-modal')"
+                        class="inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    <span class="hidden sm:inline">Tambah Karyawan</span>
+                    <span class="sm:hidden">Tambah</span>
+                </button>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
