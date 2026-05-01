@@ -17,5 +17,6 @@ class SettingGaji extends Model
         'rate_aksesoris',
         'potongan_bpjstk',
         'potongan_absensi',
+        'bebas_bpjstk_bulan',
     ];
 }

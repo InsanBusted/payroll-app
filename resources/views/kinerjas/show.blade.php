@@ -120,7 +120,7 @@
             <div>
                 <p class="text-[11px] font-semibold uppercase tracking-wider text-indigo-500">Gaji Diterima</p>
                 <p class="text-xl font-extrabold text-indigo-700 mt-0.5 tabular-nums">
-                    Rp {{ number_format($kinerja->hitungGajiDiterima(), 0, ',', '.') }}
+                    Rp {{ number_format($kinerja->hitungGajiDiterimaList(), 0, ',', '.') }}
                 </p>
             </div>
         </div>

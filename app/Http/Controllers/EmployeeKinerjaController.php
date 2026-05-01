@@ -58,7 +58,7 @@ class EmployeeKinerjaController extends Controller
     public function show(EmployeeKinerja $kinerja)
     {
         $kinerja->load('employee.jabatan', 'employee.area');
-        $rincian = $kinerja->rincianGaji();
+        $rincian = $kinerja->rincianGajiList($kinerja->employee_id);
 
         return view('kinerjas.show', compact('kinerja', 'rincian'));
     }
@@ -188,7 +188,7 @@ class EmployeeKinerjaController extends Controller
             'employee.area'
         ])->findOrFail($id);
 
-        $rincian = $kinerja->rincianGaji();
+        $rincian = $kinerja->rincianGajiList($kinerja->employee_id);
 
         return view('kinerjas.slip-preview', compact('kinerja', 'rincian'));
     }
@@ -201,7 +201,7 @@ class EmployeeKinerjaController extends Controller
             'employee.area'
         ])->findOrFail($id);
 
-        $rincian = $kinerja->rincianGaji();
+        $rincian = $kinerja->rincianGajiList($kinerja->employee_id);
 
         $pdf = Pdf::loadView('kinerjas.slip-pdf', compact('kinerja', 'rincian'))
             ->setPaper('A4', 'portrait');

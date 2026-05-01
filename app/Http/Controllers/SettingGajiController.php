@@ -18,6 +18,7 @@ class SettingGajiController extends Controller
             'rate_aksesoris' => 5000,
             'potongan_bpjstk' => 50000,
             'potongan_absensi' => 10000,
+            'bebas_bpjstk_bulan'   => 3,
         ]);
 
         return view('setting_gajis.index', compact('setting'));
@@ -33,6 +34,7 @@ class SettingGajiController extends Controller
             'rate_aksesoris' => 'required|integer|min:0',
             'potongan_bpjstk' => 'required|integer|min:0',
             'potongan_absensi' => 'required|integer|min:0',
+            'bebas_bpjstk_bulan'   => 'required|integer|min:1',
         ]);
 
         $settingGaji->update($request->all());

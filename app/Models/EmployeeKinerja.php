@@ -119,22 +119,23 @@ class EmployeeKinerja extends Model
         $setting = SettingGaji::query()->first();
         if (!$setting) return 0;
 
-        $potonganBpjstk = 0;
+        // $potonganBpjstk = 0;
 
-        if ($this->employee && $this->employee->join_date) {
-            $joinDate = Carbon::parse($this->employee->join_date);
-            $today = Carbon::now();
+        // if ($this->employee && $this->employee->join_date) {
+        //     $joinDate = Carbon::parse($this->employee->join_date);
+        //     $today = Carbon::now();
 
-            // jika sudah lebih dari / sama dengan 3 bulan
-            if ($joinDate->diffInMonths($today) >= 3) {
-                $potonganBpjstk = $setting->potongan_bpjstk;
-            }
-        }
+        //     // jika sudah lebih dari / sama dengan 3 bulan
+        //     if ($joinDate->diffInMonths($today) >= 3) {
+        //         $potonganBpjstk = $setting->potongan_bpjstk;
+        //     }
+        // }
 
         $potonganAbsensi = $this->absensi * $setting->potongan_absensi;
         $potonganPph21   = $this->hitungTotalPph21();
 
-        return $potonganBpjstk + $potonganAbsensi + $potonganPph21;
+
+        return $this->hitungPotonganBpjstk($setting) + $potonganAbsensi + $potonganPph21;
     }
 
     /**
@@ -156,34 +157,70 @@ class EmployeeKinerja extends Model
     }
 
     // Rincian untuk ditampilkan di slip:
+    private function hitungPotonganBpjstk(SettingGaji $setting): int
+    {
+        if (!$this->employee || !$this->employee->join_date) {
+            return 0;
+        }
+
+        $masaKerja = Carbon::parse($this->employee->join_date)->diffInMonths(now());
+        $bebasSampai = $setting->bebas_bpjstk_bulan ?? 3;
+
+        // Kena BPJS jika masa kerja sudah >= batas bebas
+        return $masaKerja >= $bebasSampai ? $setting->potongan_bpjstk : 0;
+    }
+
+    // public function hitungTotalPotongan(): int
+    // {
+    //     $setting = SettingGaji::query()->first();
+    //     if (!$setting) return 0;
+
+    //     return $this->hitungPotonganBpjstk($setting)
+    //         + ($this->absensi * $setting->potongan_absensi)
+    //         + $this->hitungTotalPph21();
+    // }
+
     public function rincianGaji(): array
     {
         $setting = SettingGaji::query()->first();
         if (!$setting) return [];
 
-        $potonganBpjstk = 0;
+        return [
+            'pendapatan' => [
+                'gaji_pokok'          => $this->total_hadir * $setting->rate_gaji_pokok,
+                'tunjangan_kerapihan' => $this->tunjangan_groom * $setting->rate_tunjangan_groom,
+                'srp'                 => $this->srp * $setting->rate_srp,
+                'grosir'              => $this->grosir * $setting->rate_grosir,
+                'aksesoris'           => $this->aksesoris * $setting->rate_aksesoris,
+                'bonus'               => $this->bonus,
+            ],
+            'potongan' => [
+                'bpjstk'  => $this->hitungPotonganBpjstk($setting),
+                'absensi' => $this->absensi * $setting->potongan_absensi,
+                'pph21' => $this->hitungTotalPph21(),
 
-        if ($this->employee && $this->employee->join_date) {
-            $joinDate = Carbon::parse($this->employee->join_date);
-
-            if ($joinDate->diffInMonths(now()) >= 3) {
-                $potonganBpjstk = $setting->potongan_bpjstk;
-            }
-        }
+            ]
+        ];
+    }
+    public function rincianGajiList($employeeId): array
+    {
+        $setting = SettingGaji::query()->first();
+        if (!$setting) return [];
 
         return [
             'pendapatan' => [
-                'gaji_pokok' => $this->total_hadir * $setting->rate_gaji_pokok,
+                'gaji_pokok'          => $this->total_hadir * $setting->rate_gaji_pokok,
                 'tunjangan_kerapihan' => $this->tunjangan_groom * $setting->rate_tunjangan_groom,
-                'srp' => $this->srp * $setting->rate_srp,
-                'grosir' => $this->grosir * $setting->rate_grosir,
-                'aksesoris' => $this->aksesoris * $setting->rate_aksesoris,
-                'bonus' => $this->bonus,
+                'srp'                 => $this->srp * $setting->rate_srp,
+                'grosir'              => $this->grosir * $setting->rate_grosir,
+                'aksesoris'           => $this->aksesoris * $setting->rate_aksesoris,
+                'bonus'               => $this->bonus,
             ],
             'potongan' => [
-                'bpjstk' => $potonganBpjstk,
+                'bpjstk'  => $this->hitungPotonganBpjstk($setting),
                 'absensi' => $this->absensi * $setting->potongan_absensi,
-                'pph21' => $this->hitungTotalPph21(),
+                'pph21' => $this->hitungListPph21($employeeId),
+
             ]
         ];
     }

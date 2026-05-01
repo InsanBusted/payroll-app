@@ -271,7 +271,7 @@
 {{-- ══ Gaji Bersih Banner ══ --}}
 <div class="net-banner">
     <span class="net-banner-label">Gaji Bersih Diterima</span>
-    <span class="net-banner-amount">Rp {{ number_format($kinerja->hitungGajiDiterima(), 0, ',', '.') }}</span>
+    <span class="net-banner-amount">Rp {{ number_format($kinerja->hitungGajiDiterimaList(), 0, ',', '.') }}</span>
 </div>
 
 {{-- ══ Tanda Tangan ══ --}}

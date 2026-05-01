@@ -124,7 +124,7 @@
                 Gaji Bersih Diterima
             </td>
             <td style="background-color: #1e3a5f; color: #fff; padding: 10px 14px; font-size: 15px; font-weight: bold; text-align: right; font-family: monospace;">
-                Rp {{ number_format($kinerja->hitungGajiDiterima(), 0, ',', '.') }}
+                Rp {{ number_format($kinerja->hitungGajiDiterimaList(), 0, ',', '.') }}
             </td>
         </tr>
     </table>
@@ -135,8 +135,8 @@
             <td style="width: 50%; text-align: center; vertical-align: top; padding: 0 10px;">
                 <div style="color: #666; font-size: 10px; margin-bottom: 4px;">Dikeluarkan oleh,</div>
                 <div style="height: 70px; display: flex; align-items: flex-end; justify-content: center; margin: 8px 0;">
-                    @if (auth()->user()->signature_path)
-                        <img src="{{ asset('storage/' . auth()->user()->signature_path) }}"
+                    @if ($kinerja->employee->signature_path)
+                        <img src="{{ asset('storage/' . $kinerja->employee->signature_path) }}"
                              style="max-height: 65px; max-width: 140px; object-fit: contain;" alt="TTD HRD">
                     @endif
                 </div>
