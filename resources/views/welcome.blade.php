@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,27 +11,34 @@
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700&family=syne:600,700,800" rel="stylesheet" />
 
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         :root {
-            --navy:    #0b1f3a;
-            --navy-2:  #112748;
-            --navy-3:  #1a3560;
-            --blue:    #1d6fb8;
-            --blue-2:  #2e87d8;
-            --sky:     #5db0ef;
-            --accent:  #e84c27;
-            --accent-2:#f2704f;
-            --gold:    #f0a500;
-            --white:   #ffffff;
-            --off:     #f4f7fb;
-            --muted:   #8fa3bc;
-            --border:  rgba(255,255,255,0.10);
-            --font:    'Plus Jakarta Sans', system-ui, sans-serif;
+            --navy: #0b1f3a;
+            --navy-2: #112748;
+            --navy-3: #1a3560;
+            --blue: #1d6fb8;
+            --blue-2: #2e87d8;
+            --sky: #5db0ef;
+            --accent: #e84c27;
+            --accent-2: #f2704f;
+            --gold: #f0a500;
+            --white: #ffffff;
+            --off: #f4f7fb;
+            --muted: #8fa3bc;
+            --border: rgba(255, 255, 255, 0.10);
+            --font: 'Plus Jakarta Sans', system-ui, sans-serif;
             --display: 'Syne', system-ui, sans-serif;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             font-family: var(--font);
             background: var(--navy);
@@ -51,8 +59,8 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 80% 60% at 70% 20%, rgba(29,111,184,0.25) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 10% 80%, rgba(232,76,39,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 60% at 70% 20%, rgba(29, 111, 184, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 10% 80%, rgba(232, 76, 39, 0.12) 0%, transparent 55%),
                 linear-gradient(160deg, #0b1f3a 0%, #0d2444 40%, #091929 100%);
         }
 
@@ -61,27 +69,31 @@
             position: absolute;
             inset: 0;
             background-image:
-                linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
             background-size: 48px 48px;
             mask-image: radial-gradient(ellipse 90% 90% at 60% 40%, black 10%, transparent 75%);
         }
 
         .bg-orb-1 {
             position: absolute;
-            width: 600px; height: 600px;
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(46,135,216,0.18) 0%, transparent 65%);
-            top: -150px; right: -100px;
+            background: radial-gradient(circle, rgba(46, 135, 216, 0.18) 0%, transparent 65%);
+            top: -150px;
+            right: -100px;
             animation: pulse-orb 8s ease-in-out infinite;
         }
 
         .bg-orb-2 {
             position: absolute;
-            width: 400px; height: 400px;
+            width: 400px;
+            height: 400px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(232,76,39,0.10) 0%, transparent 65%);
-            bottom: -80px; left: 30%;
+            background: radial-gradient(circle, rgba(232, 76, 39, 0.10) 0%, transparent 65%);
+            bottom: -80px;
+            left: 30%;
             animation: pulse-orb 11s ease-in-out infinite reverse;
         }
 
@@ -89,23 +101,63 @@
         .ring {
             position: absolute;
             border-radius: 50%;
-            border: 1px solid rgba(93,176,239,0.12);
+            border: 1px solid rgba(93, 176, 239, 0.12);
             animation: ring-expand 6s ease-out infinite;
         }
 
-        .ring-1 { width: 320px; height: 320px; top: 8%; right: 12%; animation-delay: 0s; }
-        .ring-2 { width: 520px; height: 520px; top: 4%; right: 8%;  animation-delay: 1.5s; }
-        .ring-3 { width: 720px; height: 720px; top: 0%; right: 4%;  animation-delay: 3s; }
+        .ring-1 {
+            width: 320px;
+            height: 320px;
+            top: 8%;
+            right: 12%;
+            animation-delay: 0s;
+        }
+
+        .ring-2 {
+            width: 520px;
+            height: 520px;
+            top: 4%;
+            right: 8%;
+            animation-delay: 1.5s;
+        }
+
+        .ring-3 {
+            width: 720px;
+            height: 720px;
+            top: 0%;
+            right: 4%;
+            animation-delay: 3s;
+        }
 
         @keyframes ring-expand {
-            0%   { opacity: 0.6; transform: scale(0.92); }
-            50%  { opacity: 0.15; transform: scale(1); }
-            100% { opacity: 0.6; transform: scale(0.92); }
+            0% {
+                opacity: 0.6;
+                transform: scale(0.92);
+            }
+
+            50% {
+                opacity: 0.15;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0.6;
+                transform: scale(0.92);
+            }
         }
 
         @keyframes pulse-orb {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.7; transform: scale(1.08); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.08);
+            }
         }
 
         /* ── LAYOUT ── */
@@ -132,10 +184,13 @@
         }
 
         .logo-mark {
-            width: 46px; height: 46px;
+            width: 46px;
+            height: 46px;
             background: var(--accent);
             border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
             position: relative;
             overflow: hidden;
@@ -145,19 +200,24 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 60%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
             border-radius: 12px;
         }
 
         .logo-mark svg {
-            width: 24px; height: 24px;
+            width: 24px;
+            height: 24px;
             fill: none;
             stroke: white;
             stroke-width: 2;
-            position: relative; z-index: 1;
+            position: relative;
+            z-index: 1;
         }
 
-        .logo-text { line-height: 1.2; }
+        .logo-text {
+            line-height: 1.2;
+        }
+
         .logo-text strong {
             display: block;
             font-size: 15px;
@@ -165,6 +225,7 @@
             color: white;
             letter-spacing: -0.01em;
         }
+
         .logo-text span {
             font-size: 11px;
             color: var(--muted);
@@ -185,8 +246,8 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(93,176,239,0.1);
-            border: 1px solid rgba(93,176,239,0.2);
+            background: rgba(93, 176, 239, 0.1);
+            border: 1px solid rgba(93, 176, 239, 0.2);
             border-radius: 20px;
             padding: 5px 14px;
             font-size: 11.5px;
@@ -200,15 +261,23 @@
         }
 
         .eyebrow-dot {
-            width: 6px; height: 6px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: var(--sky);
             animation: blink 2s ease infinite;
         }
 
         @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.3; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
         }
 
         .headline {
@@ -225,7 +294,7 @@
         .headline em {
             font-style: normal;
             color: transparent;
-            -webkit-text-stroke: 1.5px rgba(93,176,239,0.7);
+            -webkit-text-stroke: 1.5px rgba(93, 176, 239, 0.7);
         }
 
         .headline .accent-word {
@@ -236,7 +305,9 @@
         .headline .accent-word::after {
             content: '';
             position: absolute;
-            bottom: 4px; left: 0; right: 0;
+            bottom: 4px;
+            left: 0;
+            right: 0;
             height: 3px;
             background: var(--accent);
             border-radius: 2px;
@@ -263,20 +334,24 @@
             align-items: center;
             gap: 12px;
             font-size: 14px;
-            color: rgba(255,255,255,0.75);
+            color: rgba(255, 255, 255, 0.75);
         }
 
         .feature-icon {
-            width: 32px; height: 32px;
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
         }
 
         .feature-icon svg {
-            width: 15px; height: 15px;
+            width: 15px;
+            height: 15px;
             stroke: var(--sky);
             fill: none;
             stroke-width: 1.8;
@@ -284,7 +359,7 @@
 
         .left-footer {
             font-size: 12px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             animation: fade-up 0.6s 0.5s ease both;
         }
 
@@ -301,7 +376,7 @@
             width: 100%;
             max-width: 380px;
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255,255,255,0.10);
+            border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 20px;
             padding: 40px 36px;
             backdrop-filter: blur(24px);
@@ -314,12 +389,16 @@
         .login-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 10%; right: 10%;
+            top: 0;
+            left: 10%;
+            right: 10%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(93,176,239,0.5), transparent);
+            background: linear-gradient(90deg, transparent, rgba(93, 176, 239, 0.5), transparent);
         }
 
-        .card-header { margin-bottom: 32px; }
+        .card-header {
+            margin-bottom: 32px;
+        }
 
         .card-title {
             font-family: var(--display);
@@ -336,10 +415,9 @@
         }
 
         /* Error alert */
-        @if (session('status'))
-        .alert-success {
-            background: rgba(26,128,80,0.15);
-            border: 1px solid rgba(26,128,80,0.3);
+        @if (session('status')) .alert-success {
+            background: rgba(26, 128, 80, 0.15);
+            border: 1px solid rgba(26, 128, 80, 0.3);
             border-radius: 10px;
             padding: 12px 14px;
             font-size: 13px;
@@ -349,9 +427,8 @@
             gap: 10px;
             align-items: flex-start;
         }
-        @endif
 
-        .form-group {
+        @endif .form-group {
             margin-bottom: 18px;
         }
 
@@ -359,7 +436,7 @@
             display: block;
             font-size: 12px;
             font-weight: 600;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
             letter-spacing: 0.08em;
             margin-bottom: 8px;
@@ -374,7 +451,8 @@
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            width: 16px; height: 16px;
+            width: 16px;
+            height: 16px;
             stroke: var(--muted);
             fill: none;
             stroke-width: 1.8;
@@ -384,8 +462,8 @@
 
         .form-input {
             width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
             padding: 12px 14px 12px 42px;
             font-family: var(--font);
@@ -395,17 +473,23 @@
             transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         }
 
-        .form-input::placeholder { color: rgba(255,255,255,0.25); }
-
-        .form-input:focus {
-            border-color: rgba(93,176,239,0.5);
-            background: rgba(255,255,255,0.07);
-            box-shadow: 0 0 0 3px rgba(93,176,239,0.1);
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
         }
 
-        .form-input:focus + .input-focus-ring { opacity: 1; }
+        .form-input:focus {
+            border-color: rgba(93, 176, 239, 0.5);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 0 3px rgba(93, 176, 239, 0.1);
+        }
 
-        .form-input.is-error { border-color: rgba(232,76,39,0.5); }
+        .form-input:focus+.input-focus-ring {
+            opacity: 1;
+        }
+
+        .form-input.is-error {
+            border-color: rgba(232, 76, 39, 0.5);
+        }
 
         .error-msg {
             font-size: 12px;
@@ -429,13 +513,16 @@
         }
 
         .pwd-toggle svg {
-            width: 16px; height: 16px;
+            width: 16px;
+            height: 16px;
             stroke: currentColor;
             fill: none;
             stroke-width: 1.8;
         }
 
-        .pwd-toggle:hover { color: var(--sky); }
+        .pwd-toggle:hover {
+            color: var(--sky);
+        }
 
         /* Remember + forgot */
         .form-extras {
@@ -455,8 +542,9 @@
 
         .checkbox-row input[type="checkbox"] {
             appearance: none;
-            width: 16px; height: 16px;
-            border: 1.5px solid rgba(255,255,255,0.2);
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
             border-radius: 4px;
             background: transparent;
             cursor: pointer;
@@ -472,8 +560,10 @@
         .checkbox-row input[type="checkbox"]:checked::after {
             content: '';
             position: absolute;
-            top: 2px; left: 4px;
-            width: 5px; height: 8px;
+            top: 2px;
+            left: 4px;
+            width: 5px;
+            height: 8px;
             border: 1.5px solid white;
             border-top: none;
             border-left: none;
@@ -482,7 +572,7 @@
 
         .checkbox-label {
             font-size: 13px;
-            color: rgba(255,255,255,0.55);
+            color: rgba(255, 255, 255, 0.55);
         }
 
         .forgot-link {
@@ -492,7 +582,9 @@
             transition: color 0.2s;
         }
 
-        .forgot-link:hover { color: white; }
+        .forgot-link:hover {
+            color: white;
+        }
 
         /* Submit button */
         .btn-login {
@@ -516,7 +608,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
             border-radius: 10px;
             pointer-events: none;
         }
@@ -524,10 +616,12 @@
         .btn-login:hover {
             background: var(--blue-2);
             transform: translateY(-1px);
-            box-shadow: 0 8px 24px rgba(29,111,184,0.4);
+            box-shadow: 0 8px 24px rgba(29, 111, 184, 0.4);
         }
 
-        .btn-login:active { transform: translateY(0); }
+        .btn-login:active {
+            transform: translateY(0);
+        }
 
         .divider {
             display: flex;
@@ -536,13 +630,22 @@
             margin: 20px 0;
         }
 
-        .divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
-        .divider-text { font-size: 12px; color: rgba(255,255,255,0.25); white-space: nowrap; }
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .divider-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.25);
+            white-space: nowrap;
+        }
 
         .help-text {
             text-align: center;
             font-size: 12.5px;
-            color: rgba(255,255,255,0.35);
+            color: rgba(255, 255, 255, 0.35);
             line-height: 1.6;
         }
 
@@ -551,12 +654,21 @@
             text-decoration: none;
         }
 
-        .help-text a:hover { text-decoration: underline; }
+        .help-text a:hover {
+            text-decoration: underline;
+        }
 
         /* ── ANIMATIONS ── */
         @keyframes fade-up {
-            from { opacity: 0; transform: translateY(18px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ── RESPONSIVE ── */
@@ -570,10 +682,17 @@
                 padding: 32px 28px 20px;
             }
 
-            .left-body { padding-bottom: 24px; }
+            .left-body {
+                padding-bottom: 24px;
+            }
 
-            .headline { font-size: 32px; }
-            .feature-list { display: none; }
+            .headline {
+                font-size: 32px;
+            }
+
+            .feature-list {
+                display: none;
+            }
 
             .right {
                 padding: 24px 20px 44px;
@@ -581,6 +700,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Background -->
@@ -602,14 +722,14 @@
             <div class="logo-row">
                 <div class="logo-mark">
                     <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 20 Q4 4 12 4 Q20 4 20 12 Q20 20 12 20"/>
-                        <circle cx="12" cy="12" r="2.5" fill="white" stroke="none"/>
-                        <path d="M8 16 Q8 8 12 8 Q16 8 16 12"/>
+                        <path d="M4 20 Q4 4 12 4 Q20 4 20 12 Q20 20 12 20" />
+                        <circle cx="12" cy="12" r="2.5" fill="white" stroke="none" />
+                        <path d="M8 16 Q8 8 12 8 Q16 8 16 12" />
                     </svg>
                 </div>
                 <div class="logo-text">
                     <strong>PT Mila Media Telekomunikasi</strong>
-                    <span>Sistem HR &amp; Payroll</span>
+                    <span>Sistem Payroll</span>
                 </div>
             </div>
 
@@ -621,43 +741,16 @@
                 </div>
 
                 <h1 class="headline">
-                    Kelola Gaji &amp;<br>
-                    SDM dengan<br>
-                    <em>Lebih Cerdas</em>
+                    Kelola Gaji<br>
+                    dengan<br>
+                    <em>Lebih Akurat</em>
                 </h1>
 
                 <p class="desc">
-                    Platform terpadu untuk manajemen penggajian, data karyawan,
-                    dan laporan HR — dirancang khusus untuk kebutuhan
+                    Platform terpadu untuk manajemen penggajian — dirancang khusus untuk kebutuhan
                     PT Mila Media Telekomunikasi.
                 </p>
 
-                <div class="feature-list">
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-                        </div>
-                        Penggajian otomatis dengan kalkulasi PPh 21 &amp; BPJS
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                        </div>
-                        Manajemen data karyawan &amp; struktur organisasi
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        </div>
-                        Laporan &amp; analitik penggajian real-time
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">
-                            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        </div>
-                        Slip gaji digital &amp; arsip dokumen
-                    </div>
-                </div>
             </div>
 
             <div class="left-footer">
@@ -675,7 +768,7 @@
 
                 {{-- Session Status --}}
                 @if (session('status'))
-                    <div class="alert-success">{{ session('status') }}</div>
+                <div class="alert-success">{{ session('status') }}</div>
                 @endif
 
                 <form method="POST" action="{{ route('login') }}">
@@ -685,7 +778,10 @@
                     <div class="form-group">
                         <label class="form-label" for="email">Email / NIP</label>
                         <div class="input-wrap">
-                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
                             <input
                                 class="form-input {{ $errors->has('email') ? 'is-error' : '' }}"
                                 type="email"
@@ -695,11 +791,10 @@
                                 placeholder="nama@milamedia.id"
                                 autocomplete="username"
                                 autofocus
-                                required
-                            >
+                                required>
                         </div>
                         @error('email')
-                            <div class="error-msg">{{ $message }}</div>
+                        <div class="error-msg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -707,7 +802,10 @@
                     <div class="form-group">
                         <label class="form-label" for="password">Kata Sandi</label>
                         <div class="input-wrap">
-                            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                            </svg>
                             <input
                                 class="form-input {{ $errors->has('password') ? 'is-error' : '' }}"
                                 type="password"
@@ -715,14 +813,16 @@
                                 name="password"
                                 placeholder="••••••••"
                                 autocomplete="current-password"
-                                required
-                            >
+                                required>
                             <button type="button" class="pwd-toggle" id="togglePwd" aria-label="Tampilkan kata sandi">
-                                <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <svg id="eyeIcon" viewBox="0 0 24 24">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
                             </button>
                         </div>
                         @error('password')
-                            <div class="error-msg">{{ $message }}</div>
+                        <div class="error-msg">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -733,7 +833,7 @@
                             <span class="checkbox-label">Ingat saya</span>
                         </label>
                         @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="forgot-link">Lupa sandi?</a>
+                        <a href="{{ route('password.request') }}" class="forgot-link">Lupa sandi?</a>
                         @endif
                     </div>
 
@@ -764,7 +864,7 @@
         const btn = document.getElementById('togglePwd');
         const eyeIcon = document.getElementById('eyeIcon');
 
-        const eyeOpen  = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+        const eyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
         const eyeClose = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
 
         btn.addEventListener('click', () => {
@@ -786,4 +886,5 @@
         });
     </script>
 </body>
+
 </html>
