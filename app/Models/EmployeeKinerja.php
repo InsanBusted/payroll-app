@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Auth;
 
 class EmployeeKinerja extends Model
 {
@@ -76,11 +75,16 @@ class EmployeeKinerja extends Model
     {
         $setting = SettingGaji::query()->first();
         if (!$setting) return 0;
-        $totalPendapatan = $this->hitungTotalPendapatan();
 
-        $hasilAkhir = $totalPendapatan;
-        $statusPtkp = Auth::user()->employee?->ptkpStatus;
-        $rate = TerRate::query()->where('category_id', $statusPtkp?->category_id)
+        // Gunakan employee pemilik kinerja, bukan Auth::user()
+        $employee = $this->employee ?? Employee::with('ptkpStatus')->find($this->employee_id);
+        if (!$employee) return 0;
+
+        $totalPendapatan = $this->hitungTotalPendapatan();
+        $hasilAkhir      = $totalPendapatan;
+
+        $rate = TerRate::query()
+            ->where('category_id', $employee->ptkpStatus?->category_id)
             ->where('min_salary', '<=', $hasilAkhir)
             ->where(function ($q) use ($hasilAkhir) {
                 $q->where('max_salary', '>=', $hasilAkhir)
@@ -88,9 +92,7 @@ class EmployeeKinerja extends Model
             })
             ->first();
 
-        $pph21 = $hasilAkhir * ($rate?->rate / 100);
-
-        return $pph21;
+        return (int) ($hasilAkhir * ($rate?->rate / 100));
     }
 
     // untuk list di table
@@ -196,11 +198,17 @@ class EmployeeKinerja extends Model
         if (!$setting) return [];
 
         $employee = $this->employee ?? Employee::with('jabatan')->find($this->employee_id);
-        $isSales  = stripos($employee?->jabatan?->nama ?? '', 'sales') !== false;
+
+        if (!$employee || !$employee->jabatan) {
+            return [];
+        }
+
+        $rateGajiPokok = $employee->jabatan->rate_gaji_pokok ?? 0;
+        $isSales       = stripos($employee->jabatan->nama, 'sales') !== false;
 
         return [
             'pendapatan' => [
-                'gaji_pokok'          => $this->total_hadir * $setting->rate_gaji_pokok,
+                'gaji_pokok'          => $this->total_hadir * $rateGajiPokok,
                 'tunjangan_kerapihan' => $this->tunjangan_groom * $setting->rate_tunjangan_groom,
                 'srp'                 => $isSales ? $this->srp * $setting->rate_srp : 0,
                 'grosir'              => $isSales ? $this->grosir * $setting->rate_grosir : 0,
@@ -210,7 +218,7 @@ class EmployeeKinerja extends Model
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),
                 'absensi' => $this->absensi * $setting->potongan_absensi,
-                'pph21'   => $this->hitungTotalPph21(),
+                'pph21'   => $this->hitungListPph21($this->employee_id),
             ]
         ];
     }

@@ -48,10 +48,35 @@
 
     {{-- Table --}}
     <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="font-bold text-slate-800">Daftar User</h2>
+        <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center gap-3">
+            <h2 class="font-bold text-slate-800 flex-shrink-0">Daftar User</h2>
+
+            {{-- Search Form --}}
+            <form method="GET" action="{{ route('users.index') }}" class="flex items-center gap-2 flex-1 sm:justify-center">
+                <div class="relative flex-1 max-w-xs">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 pointer-events-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 0 5 11a6 6 0 0 0 12 0z"/>
+                        </svg>
+                    </span>
+                    <input type="text" name="search" value="{{ $search }}"
+                           placeholder="Cari nama user..."
+                           class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                </div>
+                <button type="submit"
+                        class="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold rounded-lg transition-colors flex-shrink-0">
+                    Cari
+                </button>
+                @if($search)
+                    <a href="{{ route('users.index') }}"
+                       class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-semibold rounded-lg transition-colors flex-shrink-0">
+                        Reset
+                    </a>
+                @endif
+            </form>
+
             <button onclick="openModal('create-modal')"
-                    class="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                    class="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex-shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 Tambah User
             </button>
@@ -136,7 +161,13 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="px-6 py-16 text-center text-slate-400 text-sm">Belum ada user.</td></tr>
+                    <tr><td colspan="5" class="px-6 py-16 text-center text-slate-400 text-sm">
+                        @if($search)
+                            Tidak ada user dengan nama "<span class="font-semibold text-slate-600">{{ $search }}</span>".
+                        @else
+                            Belum ada user.
+                        @endif
+                    </td></tr>
                 @endforelse
                 </tbody>
             </table>

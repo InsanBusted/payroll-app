@@ -10,19 +10,25 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role')->latest()->paginate(10);
+        $search = $request->input('search');
+
+        $users = User::with('role')
+            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         $roles = Role::all();
 
-        // Stats
-        $user = User::with('role')->get();
+        // Stats (selalu dari semua user, tidak terpengaruh filter)
+        $allUsers     = User::with('role')->get();
+        $totalUser    = $allUsers->count();
+        $linkedUser   = $allUsers->whereNotNull('role_id')->count();
+        $unlinkedUser = $allUsers->whereNull('role_id')->count();
 
-        $totalUser   = $user->count();
-        $linkedUser  = $user->whereNotNull('role_id')->count();
-        $unlinkedUser= $user->whereNull('role_id')->count();
-
-        return view('users.index', compact('users', 'roles', 'totalUser', 'linkedUser', 'unlinkedUser'));
+        return view('users.index', compact('users', 'roles', 'totalUser', 'linkedUser', 'unlinkedUser', 'search'));
     }
 
     public function store(Request $request)
