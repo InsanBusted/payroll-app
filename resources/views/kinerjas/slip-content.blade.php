@@ -136,7 +136,7 @@
             <td style="width: 50%; text-align: center; vertical-align: top; padding: 0 10px;">
                 <div style="color: #666; font-size: 10px; margin-bottom: 4px;">Dikeluarkan oleh,</div>
                 <div style="height: 70px; display: flex; align-items: flex-end; justify-content: center; margin: 8px 0;">
-                    @if ($kinerja->employee->signature_path)
+                    @if ($kinerja->transferredBy?->employee->signature_path)
                         <img src="{{ asset('storage/' . $kinerja->employee->signature_path) }}"
                              style="max-height: 65px; max-width: 140px; object-fit: contain;" alt="TTD HRD">
                     @endif
@@ -151,7 +151,7 @@
             <td style="width: 50%; text-align: center; vertical-align: top; padding: 0 10px;">
                 <div style="color: #666; font-size: 10px; margin-bottom: 4px;">Diterima oleh,</div>
                 <div style="height: 70px; display: flex; align-items: flex-end; justify-content: center; margin: 8px 0;">
-                    @if ($kinerja->employee->signature_path)
+                    @if ($kinerja->transferredBy?->employee->signature_path)
                         <img src="{{ asset('storage/' . $kinerja->employee->signature_path) }}"
                              style="max-height: 65px; max-width: 140px; object-fit: contain;" alt="TTD Karyawan">
                     @endif
