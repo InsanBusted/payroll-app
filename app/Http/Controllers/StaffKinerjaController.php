@@ -87,4 +87,15 @@ class StaffKinerjaController extends Controller
 
         return $pdf->download('Slip-Gaji-' . $kinerja->employee->nama . '-' . $kinerja->periode . '.pdf');
     }
+
+    public function konfirmasiTerima($id)
+    {
+        $kinerja = EmployeeKinerja::findOrFail($id);
+
+        $kinerja->update([
+            'status_diterima' => true
+        ]);
+
+        return back()->with('success', 'Gaji berhasil dikonfirmasi diterima.');
+    }
 }

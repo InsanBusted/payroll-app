@@ -156,13 +156,57 @@
             </div>
 
             {{-- Slip Gaji Actions --}}
+            {{-- Slip Gaji Actions --}}
             <div
                 class="bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-4 mb-6 flex items-center justify-between">
                 <div>
                     <p class="text-sm font-semibold text-slate-700">Slip Gaji — {{ $periodeTeks }}</p>
                     <p class="text-xs text-slate-400 mt-0.5">Unduh atau preview slip gaji Anda</p>
+
+                    {{-- Status --}}
+                    <div class="flex flex-wrap gap-2 mt-2">
+
+                        @if ($kinerja->status_gaji)
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                                Sudah Transfer
+                            </span>
+                        @else
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                                Belum Transfer
+                            </span>
+                        @endif
+
+                        @if ($kinerja->status_diterima)
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                                Sudah Diterima
+                            </span>
+                        @else
+                            <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                                Belum Diterima
+                            </span>
+                        @endif
+
+                    </div>
                 </div>
+
                 <div class="flex items-center gap-2">
+
+                    {{-- Tombol Staff Konfirmasi --}}
+                    @if ($kinerja->status_gaji && !$kinerja->status_diterima)
+                        <form method="POST" action="{{ route('staff.kinerja.terima', $kinerja->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-500 text-white text-xs font-semibold hover:bg-indigo-600 transition-colors">
+                                Konfirmasi Diterima
+                            </button>
+                        </form>
+                    @endif
+
                     <a href="{{ route('staff.kinerja.slip', $kinerja->id) }}" target="_blank"
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors border border-emerald-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"
@@ -173,6 +217,7 @@
                         </svg>
                         Preview Slip
                     </a>
+
                     <a href="{{ route('staff.kinerja.slip.download', $kinerja->id) }}"
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-50 text-violet-700 text-xs font-semibold hover:bg-violet-100 transition-colors border border-violet-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2"

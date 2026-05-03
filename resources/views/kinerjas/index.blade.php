@@ -150,13 +150,23 @@
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <h2 class="font-bold text-slate-800">Daftar Kinerja Bulanan</h2>
-            <button onclick="openModal('create-modal')"
-                class="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Manual
-            </button>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('kinerjas.export', array_filter(['periode' => request('periode')])) }}"
+                    class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export Excel{{ request('periode') ? ' (' . request('periode') . ')' : '' }}
+                </a>
+                <button onclick="openModal('create-modal')"
+                    class="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah Manual
+                </button>
+            </div>
         </div>
 
         {{-- Filter Bar --}}
@@ -304,12 +314,20 @@
                             class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">
                             Gaji Bersih</th>
                         <th
+                            class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">
+                            Status
+                        </th>
+                        <th
                             class="text-right text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">
                             Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($kinerjas as $k)
+                        {{-- @php
+                            dd($k->employee);
+                        @endphp --}}
+
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 font-semibold text-slate-700 whitespace-nowrap">{{ $k->periode }}
                             </td>
@@ -336,6 +354,37 @@
                             <td class="px-6 py-4 font-bold text-emerald-600 whitespace-nowrap">
                                 Rp {{ number_format($k->hitungGajiDiterimaList(), 0, ',', '.') }}
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="space-y-1">
+
+                                    {{-- Status Transfer --}}
+                                    @if ($k->status_gaji)
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                                            Sudah Transfer
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-semibold">
+                                            Belum Transfer
+                                        </span>
+                                    @endif
+
+                                    {{-- Status Diterima --}}
+                                    @if ($k->status_diterima)
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-semibold">
+                                            Sudah Diterima
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">
+                                            Belum Diterima
+                                        </span>
+                                    @endif
+
+                                </div>
+                            </td>
                             <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                 <a href="{{ route('kinerjas.show', $k) }}"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-600 text-xs font-semibold hover:bg-slate-100 transition-colors">
@@ -361,6 +410,18 @@
                                         Hapus
                                     </button>
                                 </form>
+                                {{-- Finance konfirmasi transfer --}}
+                                @if (auth()->user()->role->name === 'finance' && !$k->status_gaji)
+                                    <form method="POST" action="{{ route('kinerjas.transfer', $k) }}"
+                                        class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors">
+                                            Sudah Transfer
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

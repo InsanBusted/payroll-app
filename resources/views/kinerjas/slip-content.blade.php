@@ -132,6 +132,7 @@
     {{-- ══ Tanda Tangan ══ --}}
     <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
         <tr>
+            @if ($kinerja->status_gaji)
             <td style="width: 50%; text-align: center; vertical-align: top; padding: 0 10px;">
                 <div style="color: #666; font-size: 10px; margin-bottom: 4px;">Dikeluarkan oleh,</div>
                 <div style="height: 70px; display: flex; align-items: flex-end; justify-content: center; margin: 8px 0;">
@@ -141,10 +142,12 @@
                     @endif
                 </div>
                 <div style="border-top: 1px solid #333; padding-top: 4px; font-weight: bold; font-size: 11px;">
-                    {{ auth()->user()->name }}
+                    {{ $kinerja->transferredBy->name ?? auth()->user()->name }}
                 </div>
-                <div style="font-size: 10px; color: #555; margin-top: 2px;">HRD / Admin</div>
+                <div style="font-size: 10px; color: #555; margin-top: 2px;">{{ $kinerja->transferredBy?->employee?->jabatan?->nama ?? 'HRD / Admin' }}</div>
             </td>
+            @endif
+            @if ($kinerja->status_diterima)
             <td style="width: 50%; text-align: center; vertical-align: top; padding: 0 10px;">
                 <div style="color: #666; font-size: 10px; margin-bottom: 4px;">Diterima oleh,</div>
                 <div style="height: 70px; display: flex; align-items: flex-end; justify-content: center; margin: 8px 0;">
@@ -156,8 +159,9 @@
                 <div style="border-top: 1px solid #333; padding-top: 4px; font-weight: bold; font-size: 11px;">
                     {{ $kinerja->employee->nama }}
                 </div>
-                <div style="font-size: 10px; color: #555; margin-top: 2px;">Karyawan</div>
+                <div style="font-size: 10px; color: #555; margin-top: 2px;">{{ $kinerja->employee?->jabatan?->nama ?? 'Karyawan' }}</div>
             </td>
+            @endif
         </tr>
     </table>
 

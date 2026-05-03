@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeeKinerjaController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StaffKinerjaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -62,11 +63,14 @@ Route::middleware('auth')->group(function () {
 
     // Employee Kinerja
     Route::get('/kinerjas', [App\Http\Controllers\EmployeeKinerjaController::class, 'index'])->name('kinerjas.index');
+    Route::get('/kinerjas/export', [EmployeeKinerjaController::class, 'export'])->name('kinerjas.export');
     Route::get('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'show'])->name('kinerjas.show');
     Route::post('/kinerjas', [App\Http\Controllers\EmployeeKinerjaController::class, 'store'])->name('kinerjas.store');
     Route::post('/kinerjas/import', [App\Http\Controllers\EmployeeKinerjaController::class, 'importExcel'])->name('kinerjas.import');
     Route::put('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'update'])->name('kinerjas.update');
     Route::delete('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'destroy'])->name('kinerjas.destroy');
+    Route::patch('/kinerjas/{kinerja}/transfer', [EmployeeKinerjaController::class, 'transfer'])->name('kinerjas.transfer');
+    Route::patch('/kinerjas/{kinerja}/terima', [EmployeeKinerjaController::class, 'terima'])->name('kinerjas.terima');
 
     // Slip Gaji - Employee Kinerja
     Route::get('/kinerjas/{id}/slip', [EmployeeKinerjaController::class, 'slip'])
@@ -80,6 +84,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/staff/kinerja', [App\Http\Controllers\StaffKinerjaController::class, 'index'])->name('staff.kinerja');
         Route::get('/staff/kinerja/{id}/slip', [App\Http\Controllers\StaffKinerjaController::class, 'slip'])->name('staff.kinerja.slip');
         Route::get('/staff/kinerja/{id}/slip/download', [App\Http\Controllers\StaffKinerjaController::class, 'downloadSlip'])->name('staff.kinerja.slip.download');
+        Route::patch('/staff/kinerja/{id}/terima', [StaffKinerjaController::class, 'konfirmasiTerima'])
+            ->name('staff.kinerja.terima');
     });
 });
 

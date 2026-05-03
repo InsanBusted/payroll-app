@@ -30,17 +30,6 @@
 
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Rate Gaji Pokok (Per
-                                Hadir)</label>
-                            <div class="relative">
-                                <span class="absolute left-3.5 top-2.5 text-sm font-semibold text-slate-400">Rp</span>
-                                <input type="number" name="rate_gaji_pokok" value="{{ $setting->rate_gaji_pokok }}"
-                                    required min="0"
-                                    class="w-full border border-slate-300 rounded-xl pl-10 pr-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
-                            </div>
-                        </div>
-
-                        <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Rate Tunj. Kerapihan (Per
                                 Groom)</label>
                             <div class="relative">

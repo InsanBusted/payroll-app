@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Imports\EmployeeKinerjaImport;
+use App\Exports\EmployeeKinerjaExport;
 use App\Models\Employee;
 use App\Models\EmployeeKinerja;
 use Illuminate\Http\Request;
@@ -44,7 +45,8 @@ class EmployeeKinerjaController extends Controller
         };
 
         $kinerjas  = $query->paginate(10)->withQueryString();
-        $employees = Employee::orderBy('nama', 'asc')->get();
+        $employees = Employee::with('jabatan')->orderBy('nama', 'asc')->get();
+        // dd($employees);
 
         // Daftar periode yang ada di DB untuk dropdown filter
         $availablePeriodes = EmployeeKinerja::select('periode')
@@ -207,5 +209,36 @@ class EmployeeKinerjaController extends Controller
             ->setPaper('A4', 'portrait');
 
         return $pdf->download('Slip-Gaji-' . $kinerja->employee->nama . '.pdf');
+    }
+
+
+    public function transfer(EmployeeKinerja $kinerja)
+    {
+        $kinerja->update([
+            'status_gaji'    => true,
+            'transferred_by' => \Illuminate\Support\Facades\Auth::id(),
+        ]);
+
+        return back()->with('success', 'Gaji berhasil ditandai sudah ditransfer.');
+    }
+
+    public function terima(EmployeeKinerja $kinerja)
+    {
+        $kinerja->update([
+            'status_diterima' => true
+        ]);
+
+        return back()->with('success', 'Gaji berhasil dikonfirmasi diterima.');
+    }
+
+    public function export(Request $request)
+    {
+        $periode = $request->input('periode');
+
+        $filename = $periode
+            ? 'laporan-kinerja-' . $periode . '.xlsx'
+            : 'laporan-kinerja-semua.xlsx';
+
+        return Excel::download(new EmployeeKinerjaExport($periode), $filename);
     }
 }

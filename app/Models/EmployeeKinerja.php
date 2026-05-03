@@ -24,11 +24,19 @@ class EmployeeKinerja extends Model
         'bpjstk',
         'absensi',
         'pph21',
+        'status_gaji',
+        'transferred_by',
+        'status_diterima'
     ];
 
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function transferredBy(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'transferred_by');
     }
 
     /**
@@ -37,16 +45,30 @@ class EmployeeKinerja extends Model
 
     public function hitungTotalPendapatan(): int
     {
-        $setting = SettingGaji::query()->first();
+        $setting = SettingGaji::first();
         if (!$setting) return 0;
 
-        $gajiPokok = $this->total_hadir * $setting->rate_gaji_pokok;
-        $tunjanganKerapihan = $this->tunjangan_groom * $setting->rate_tunjangan_groom;
-        $valueSrp = $this->srp * $setting->rate_srp;
-        $valueGrosir = $this->grosir * $setting->rate_grosir;
-        $valueAksesoris = $this->aksesoris * $setting->rate_aksesoris;
+        $employee = Employee::with('jabatan')->find($this->employee_id);
 
-        return $gajiPokok + $tunjanganKerapihan + $valueSrp + $valueGrosir + $valueAksesoris + $this->bonus;
+        if (!$employee || !$employee->jabatan) {
+            return 0;
+        }
+
+        $rateGajiPokok = $employee->jabatan->rate_gaji_pokok;
+        $isSales = stripos($employee->jabatan->nama, 'sales') !== false;
+
+        $gajiPokok          = $this->total_hadir * $rateGajiPokok;
+        $tunjanganKerapihan = $this->tunjangan_groom * $setting->rate_tunjangan_groom;
+        $valueSrp           = $isSales ? $this->srp * $setting->rate_srp : 0;
+        $valueGrosir        = $isSales ? $this->grosir * $setting->rate_grosir : 0;
+        $valueAksesoris     = $isSales ? $this->aksesoris * $setting->rate_aksesoris : 0;
+
+        return $gajiPokok
+            + $tunjanganKerapihan
+            + $valueSrp
+            + $valueGrosir
+            + $valueAksesoris
+            + $this->bonus;
     }
 
     // untuk hitung total pph21
@@ -119,18 +141,6 @@ class EmployeeKinerja extends Model
         $setting = SettingGaji::query()->first();
         if (!$setting) return 0;
 
-        // $potonganBpjstk = 0;
-
-        // if ($this->employee && $this->employee->join_date) {
-        //     $joinDate = Carbon::parse($this->employee->join_date);
-        //     $today = Carbon::now();
-
-        //     // jika sudah lebih dari / sama dengan 3 bulan
-        //     if ($joinDate->diffInMonths($today) >= 3) {
-        //         $potonganBpjstk = $setting->potongan_bpjstk;
-        //     }
-        // }
-
         $potonganAbsensi = $this->absensi * $setting->potongan_absensi;
         $potonganPph21   = $this->hitungTotalPph21();
 
@@ -185,42 +195,55 @@ class EmployeeKinerja extends Model
         $setting = SettingGaji::query()->first();
         if (!$setting) return [];
 
+        $employee = $this->employee ?? Employee::with('jabatan')->find($this->employee_id);
+        $isSales  = stripos($employee?->jabatan?->nama ?? '', 'sales') !== false;
+
         return [
             'pendapatan' => [
                 'gaji_pokok'          => $this->total_hadir * $setting->rate_gaji_pokok,
                 'tunjangan_kerapihan' => $this->tunjangan_groom * $setting->rate_tunjangan_groom,
-                'srp'                 => $this->srp * $setting->rate_srp,
-                'grosir'              => $this->grosir * $setting->rate_grosir,
-                'aksesoris'           => $this->aksesoris * $setting->rate_aksesoris,
+                'srp'                 => $isSales ? $this->srp * $setting->rate_srp : 0,
+                'grosir'              => $isSales ? $this->grosir * $setting->rate_grosir : 0,
+                'aksesoris'           => $isSales ? $this->aksesoris * $setting->rate_aksesoris : 0,
                 'bonus'               => $this->bonus,
             ],
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),
                 'absensi' => $this->absensi * $setting->potongan_absensi,
-                'pph21' => $this->hitungTotalPph21(),
-
+                'pph21'   => $this->hitungTotalPph21(),
             ]
         ];
     }
     public function rincianGajiList($employeeId): array
     {
-        $setting = SettingGaji::query()->first();
+        $setting = SettingGaji::first();
         if (!$setting) return [];
+
+        $employee = Employee::with('jabatan')
+            ->where('id', $employeeId)
+            ->first();
+
+        if (!$employee || !$employee->jabatan) {
+            return [];
+        }
+
+        $rateGajiPokok = $employee->jabatan->rate_gaji_pokok ?? 0;
+        $isSales       = stripos($employee->jabatan->nama, 'sales') !== false;
 
         return [
             'pendapatan' => [
-                'gaji_pokok'          => $this->total_hadir * $setting->rate_gaji_pokok,
+                'gaji_pokok'          => $this->total_hadir * $rateGajiPokok,
                 'tunjangan_kerapihan' => $this->tunjangan_groom * $setting->rate_tunjangan_groom,
-                'srp'                 => $this->srp * $setting->rate_srp,
-                'grosir'              => $this->grosir * $setting->rate_grosir,
-                'aksesoris'           => $this->aksesoris * $setting->rate_aksesoris,
+                'srp'                 => $isSales ? $this->srp * $setting->rate_srp : 0,
+                'grosir'              => $isSales ? $this->grosir * $setting->rate_grosir : 0,
+                'aksesoris'           => $isSales ? $this->aksesoris * $setting->rate_aksesoris : 0,
                 'bonus'               => $this->bonus,
             ],
+
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),
                 'absensi' => $this->absensi * $setting->potongan_absensi,
-                'pph21' => $this->hitungListPph21($employeeId),
-
+                'pph21'   => $this->hitungListPph21($employeeId),
             ]
         ];
     }

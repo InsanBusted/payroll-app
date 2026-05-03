@@ -11,7 +11,6 @@ class SettingGajiController extends Controller
     {
         // Ambil setting gaji pertama, jika tidak ada, buat dengan nilai default
         $setting = SettingGaji::query()->first() ?? SettingGaji::create([
-            'rate_gaji_pokok' => 30000,
             'rate_tunjangan_groom' => 10000,
             'rate_srp' => 30000,
             'rate_grosir' => 10000,
@@ -21,13 +20,14 @@ class SettingGajiController extends Controller
             'bebas_bpjstk_bulan'   => 3,
         ]);
 
+
+
         return view('setting_gajis.index', compact('setting'));
     }
 
     public function update(Request $request, SettingGaji $settingGaji)
     {
         $request->validate([
-            'rate_gaji_pokok' => 'required|integer|min:0',
             'rate_tunjangan_groom' => 'required|integer|min:0',
             'rate_srp' => 'required|integer|min:0',
             'rate_grosir' => 'required|integer|min:0',

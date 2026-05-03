@@ -10,7 +10,6 @@ class SettingGaji extends Model
     use HasFactory;
 
     protected $fillable = [
-        'rate_gaji_pokok',
         'rate_tunjangan_groom',
         'rate_srp',
         'rate_grosir',

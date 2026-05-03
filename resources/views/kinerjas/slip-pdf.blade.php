@@ -277,6 +277,7 @@
 {{-- ══ Tanda Tangan ══ --}}
 <table class="signature-table">
     <tr>
+        @if ($kinerja->status_gaji)
         <td>
             <div class="sig-role">Dikeluarkan oleh,</div>
             <div class="signature-box">
@@ -284,9 +285,11 @@
                     <img src="{{ public_path('storage/' . auth()->user()->signature_path) }}" alt="TTD HRD">
                 @endif
             </div>
-            <div class="signature-line">{{ auth()->user()->name }}</div>
-            <div style="font-size:10px;color:#555;margin-top:2px;">HRD / Admin</div>
+            <div class="signature-line">{{ $kinerja->transferredBy->name ?? auth()->user()->name }}</div>
+            <div style="font-size:10px;color:#555;margin-top:2px;">{{ $kinerja->transferredBy?->employee?->jabatan?->nama ?? 'HRD / Admin' }}</div>
         </td>
+        @endif
+        @if ($kinerja->status_diterima)
         <td>
             <div class="sig-role">Diterima oleh,</div>
             <div class="signature-box">
@@ -295,8 +298,9 @@
                 @endif
             </div>
             <div class="signature-line">{{ $kinerja->employee->nama }}</div>
-            <div style="font-size:10px;color:#555;margin-top:2px;">Karyawan</div>
+            <div style="font-size:10px;color:#555;margin-top:2px;">{{ $kinerja->employee?->jabatan?->nama ?? 'Karyawan' }}</div>
         </td>
+        @endif
     </tr>
 </table>
 
