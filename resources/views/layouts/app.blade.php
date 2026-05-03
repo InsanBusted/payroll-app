@@ -42,6 +42,7 @@
             <nav class="flex-1 px-3 py-4 space-y-0.5">
                 <p class="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Menu</p>
 
+                {{-- Dashboard — semua role bisa akses --}}
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
                       {{ request()->routeIs('dashboard') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
@@ -53,7 +54,21 @@
                     Dashboard
                 </a>
 
-                @if (Auth::user()->hasRole('staff'))
+                @if (Auth::user()->hasRole('direktur'))
+                    {{-- ── Menu khusus Direktur: hanya Laporan Kinerja ── --}}
+                    <a href="{{ route('kinerjas.index') }}"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                          {{ request()->routeIs('kinerjas.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
+                        <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Laporan Kinerja Karyawan
+                        <span class="ml-auto text-[9px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-md">DIR</span>
+                    </a>
+
+                @elseif (Auth::user()->hasRole('staff'))
                     {{-- ── Menu khusus Staff ── --}}
                     <a href="{{ route('staff.kinerja') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
@@ -65,6 +80,7 @@
                         </svg>
                         Kinerja Saya
                     </a>
+
                 @else
                     {{-- ── Menu Admin / Superadmin ── --}}
                     <a href="{{ route('employees.index') }}"
@@ -95,7 +111,7 @@
                     @if (Auth::user()->hasRole('superadmin'))
                         <a href="{{ route('users.index') }}"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                          {{ request()->routeIs('users.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
+                              {{ request()->routeIs('users.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                             <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor"
                                 stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -118,8 +134,8 @@
                         Roles
                     </a>
 
-                    <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Master Data
-                    </p>
+                    <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                        Master Data</p>
 
                     <a href="{{ route('jabatans.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
@@ -155,6 +171,7 @@
                         </svg>
                         Setting Gaji
                     </a>
+
                 @endif
             </nav>
 
@@ -171,9 +188,11 @@
                         <div class="text-slate-500 text-[11px] truncate">
                             {{ Auth::user()->role?->display_name ?? 'No Role' }}</div>
                     </div>
-                    <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-300 transition-colors flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-300 transition-colors flex-shrink-0"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </a>
             </div>
@@ -189,7 +208,8 @@
                     <a href="{{ route('profile.edit') }}"
                         class="inline-flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('profile.*') ? 'bg-slate-100' : '' }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         Profile
                     </a>
