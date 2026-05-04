@@ -281,8 +281,8 @@
         <td>
             <div class="sig-role">Dikeluarkan oleh,</div>
             <div class="signature-box">
-                @if (auth()->user()->signature_path)
-                    <img src="{{ public_path('storage/' . auth()->user()->signature_path) }}" alt="TTD HRD">
+                @if ($kinerja->transferredBy?->employee->signature_path)
+                    <img src="{{ public_path('storage/' . $kinerja->transferredBy?->employee->signature_path) }}" alt="TTD HRD">
                 @endif
             </div>
             <div class="signature-line">{{ $kinerja->transferredBy->name ?? auth()->user()->name }}</div>
