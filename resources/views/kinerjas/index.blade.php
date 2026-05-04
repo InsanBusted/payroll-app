@@ -59,69 +59,71 @@
         </div>
     </div>
 
-    {{-- Import Excel Card --}}
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-            <div
-                class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-            </div>
-            <div>
-                <h2 class="font-bold text-slate-800 text-sm">Import Data Kinerja dari Excel</h2>
-                <p class="text-xs text-slate-400 mt-0.5">Upload file Excel (.xlsx / .xls) dengan kolom: NIK Karyawan,
-                    Total Hadir, Tunj. Groom, SRP, GROSIR, AKSESORIS, BONUS, Absensi</p>
-            </div>
-        </div>
-        <div class="px-4 sm:px-6 py-5">
-            <form method="POST" action="{{ route('kinerjas.import') }}" enctype="multipart/form-data"
-                id="import-form"
-                class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-                @csrf
-
-                {{-- Periode Bulan & Tahun --}}
-                <div class="w-full sm:w-auto flex-shrink-0">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Periode</label>
-                    <input type="month" name="periode" required
-                        value="{{ date('Y-m') }}"
-                        class="w-full sm:w-auto border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition min-w-[180px]">
+    {{-- Import Excel Card (Khusus Finance) --}}
+    @if (auth()->user()->role->name === 'finance')
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                <div
+                    class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
                 </div>
+                <div>
+                    <h2 class="font-bold text-slate-800 text-sm">Import Data Kinerja dari Excel</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Upload file Excel (.xlsx / .xls) dengan kolom: NIK Karyawan,
+                        Total Hadir, Tunj. Groom, SRP, GROSIR, AKSESORIS, BONUS, Absensi</p>
+                </div>
+            </div>
+            <div class="px-4 sm:px-6 py-5">
+                <form method="POST" action="{{ route('kinerjas.import') }}" enctype="multipart/form-data"
+                    id="import-form"
+                    class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+                    @csrf
 
-                {{-- Upload File --}}
-                <div class="flex-1 w-full">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">File Excel</label>
-                    <div class="relative">
-                        <input type="file" name="file" id="excel-file" accept=".xlsx,.xls,.csv" required
-                            onchange="updateFileName(this)"
-                            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
-                        <div id="file-label"
-                            class="flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-500 hover:border-emerald-400 hover:bg-emerald-50 transition-colors cursor-pointer w-full">
-                            <svg class="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor"
-                                stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span id="file-name-text" class="truncate">Klik untuk pilih file Excel...</span>
+                    {{-- Periode Bulan & Tahun --}}
+                    <div class="w-full sm:w-auto flex-shrink-0">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Periode</label>
+                        <input type="month" name="periode" required
+                            value="{{ date('Y-m') }}"
+                            class="w-full sm:w-auto border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition min-w-[180px]">
+                    </div>
+
+                    {{-- Upload File --}}
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">File Excel</label>
+                        <div class="relative">
+                            <input type="file" name="file" id="excel-file" accept=".xlsx,.xls,.csv" required
+                                onchange="updateFileName(this)"
+                                class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+                            <div id="file-label"
+                                class="flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-500 hover:border-emerald-400 hover:bg-emerald-50 transition-colors cursor-pointer w-full">
+                                <svg class="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor"
+                                    stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span id="file-name-text" class="truncate">Klik untuk pilih file Excel...</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {{-- Submit --}}
-                <div class="w-full sm:w-auto flex-shrink-0">
-                    <button type="submit"
-                        class="w-full sm:w-auto justify-center inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        Import Excel
-                    </button>
-                </div>
-            </form>
+                    {{-- Submit --}}
+                    <div class="w-full sm:w-auto flex-shrink-0">
+                        <button type="submit"
+                            class="w-full sm:w-auto justify-center inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm whitespace-nowrap">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Import Excel
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    @endif
 
     {{-- Table --}}
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
