@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Payroll') }} — {{ $title ?? 'Dashboard' }}</title>
+    <title>{{ $title ?? 'Dashboard' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -19,9 +19,11 @@
 
 <body class="bg-slate-100 antialiased">
     <div class="flex min-h-screen">
+        {{-- Mobile Overlay --}}
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden lg:hidden transition-opacity"></div>
 
         {{-- ── Sidebar ── --}}
-        <aside class="fixed inset-y-0 left-0 w-64 bg-slate-900 flex flex-col z-50 overflow-y-auto">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 flex flex-col z-50 overflow-y-auto transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
 
             {{-- Brand --}}
             <div class="flex items-center gap-3 px-5 py-5 border-b border-white/10">
@@ -44,7 +46,7 @@
 
                 {{-- Dashboard — semua role bisa akses --}}
                 <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                       {{ request()->routeIs('dashboard') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                     <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24">
@@ -57,7 +59,7 @@
                 @if (Auth::user()->hasRole('direktur'))
                     {{-- ── Menu khusus Direktur: hanya Laporan Kinerja ── --}}
                     <a href="{{ route('kinerjas.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('kinerjas.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -71,7 +73,7 @@
                 @elseif (Auth::user()->hasRole('staff'))
                     {{-- ── Menu khusus Staff ── --}}
                     <a href="{{ route('staff.kinerja') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('staff.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -84,7 +86,7 @@
                 @else
                     {{-- ── Menu Admin / Superadmin ── --}}
                     <a href="{{ route('employees.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('employees.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -95,7 +97,7 @@
                     </a>
 
                     <a href="{{ route('kinerjas.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('kinerjas.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -110,7 +112,7 @@
 
                     @if (Auth::user()->hasRole('superadmin'))
                         <a href="{{ route('users.index') }}"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                               {{ request()->routeIs('users.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                             <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor"
                                 stroke-width="2" viewBox="0 0 24 24">
@@ -124,7 +126,7 @@
                     @endif
 
                     <a href="{{ route('roles.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('roles.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -138,7 +140,7 @@
                         Master Data</p>
 
                     <a href="{{ route('jabatans.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('jabatans.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -149,7 +151,7 @@
                     </a>
 
                     <a href="{{ route('areas.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('areas.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -161,7 +163,7 @@
                     </a>
 
                     <a href="{{ route('setting_gaji.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('setting_gaji.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
                         <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -199,11 +201,18 @@
         </aside>
 
         {{-- ── Main ── --}}
-        <div class="ml-64 flex-1 flex flex-col">
+        <div class="lg:ml-64 flex-1 flex flex-col min-w-0">
 
             <header
-                class="sticky top-0 z-40 bg-white border-b border-slate-200 px-8 h-16 flex items-center justify-between">
-                <h1 class="text-lg font-bold text-slate-800">{{ $title ?? 'Dashboard' }}</h1>
+                class="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button id="mobile-menu-btn" class="lg:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <h1 class="text-lg font-bold text-slate-800">{{ $title ?? 'Dashboard' }}</h1>
+                </div>
                 <div class="flex items-center gap-2">
                     <a href="{{ route('profile.edit') }}"
                         class="inline-flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('profile.*') ? 'bg-slate-100' : '' }}">
@@ -229,7 +238,7 @@
             </header>
 
             {{-- Content --}}
-            <main class="flex-1 p-8">
+            <main class="flex-1 p-4 lg:p-8 overflow-x-hidden">
                 @if (session('success'))
                     <div
                         class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 text-sm font-medium px-5 py-3.5 rounded-xl mb-6">
@@ -270,6 +279,32 @@
             </main>
         </div>
     </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+
+        function toggleSidebar() {
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            if (isOpen) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', toggleSidebar);
+        }
+        if (overlay) {
+            overlay.addEventListener('click', toggleSidebar);
+        }
+    </script>
 </body>
 
 </html>

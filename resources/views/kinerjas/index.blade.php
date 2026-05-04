@@ -75,41 +75,18 @@
                     Total Hadir, Tunj. Groom, SRP, GROSIR, AKSESORIS, BONUS, Absensi</p>
             </div>
         </div>
-        <div class="px-6 py-5">
+        <div class="px-4 sm:px-6 py-5">
             <form method="POST" action="{{ route('kinerjas.import') }}" enctype="multipart/form-data"
+                id="import-form"
                 class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
                 @csrf
-                {{-- Dropdown Pilih Bulan --}}
-                <div class="flex-shrink-0">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Periode Bulan</label>
-                    <select name="periode" required
-                        class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition min-w-[180px]">
-                        <option value="">— Pilih Bulan —</option>
-                        @php
-                            $months = [
-                                '01' => 'Januari',
-                                '02' => 'Februari',
-                                '03' => 'Maret',
-                                '04' => 'April',
-                                '05' => 'Mei',
-                                '06' => 'Juni',
-                                '07' => 'Juli',
-                                '08' => 'Agustus',
-                                '09' => 'September',
-                                '10' => 'Oktober',
-                                '11' => 'November',
-                                '12' => 'Desember',
-                            ];
-                            $currentYear = date('Y');
-                            $currentMonth = date('m');
-                        @endphp
-                        @foreach ($months as $num => $label)
-                            @php $val = $currentYear . '-' . $num; @endphp
-                            <option value="{{ $val }}" {{ $currentMonth == $num ? 'selected' : '' }}>
-                                {{ $label }} {{ $currentYear }}
-                            </option>
-                        @endforeach
-                    </select>
+
+                {{-- Periode Bulan & Tahun --}}
+                <div class="w-full sm:w-auto flex-shrink-0">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Periode</label>
+                    <input type="month" name="periode" required
+                        value="{{ date('Y-m') }}"
+                        class="w-full sm:w-auto border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition min-w-[180px]">
                 </div>
 
                 {{-- Upload File --}}
@@ -120,21 +97,21 @@
                             onchange="updateFileName(this)"
                             class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
                         <div id="file-label"
-                            class="flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-500 hover:border-emerald-400 hover:bg-emerald-50 transition-colors cursor-pointer">
+                            class="flex items-center gap-3 border border-dashed border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-500 hover:border-emerald-400 hover:bg-emerald-50 transition-colors cursor-pointer w-full">
                             <svg class="w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor"
                                 stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span id="file-name-text">Klik untuk pilih file Excel...</span>
+                            <span id="file-name-text" class="truncate">Klik untuk pilih file Excel...</span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Submit --}}
-                <div class="flex-shrink-0">
+                <div class="w-full sm:w-auto flex-shrink-0">
                     <button type="submit"
-                        class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm whitespace-nowrap">
+                        class="w-full sm:w-auto justify-center inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm whitespace-nowrap">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -148,9 +125,9 @@
 
     {{-- Table --}}
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="font-bold text-slate-800">Daftar Kinerja Bulanan</h2>
-            <div class="flex items-center gap-2">
+        <div class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 class="font-bold text-slate-800 text-center sm:text-left">Daftar Kinerja Bulanan</h2>
+            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                 <a href="{{ route('kinerjas.export', array_filter(['periode' => request('periode')])) }}"
                     class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -171,10 +148,10 @@
 
         {{-- Filter Bar --}}
         <form method="GET" action="{{ route('kinerjas.index') }}"
-            class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+            class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 items-start sm:items-end flex-wrap">
 
             {{-- Search --}}
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 w-full sm:w-auto min-w-[200px]">
                 <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Cari Nama
                     / NIK</label>
                 <div class="relative">
@@ -190,11 +167,11 @@
             </div>
 
             {{-- Filter Periode --}}
-            <div class="flex-shrink-0">
+            <div class="w-full sm:w-auto flex-shrink-0">
                 <label
                     class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Periode</label>
                 <select name="periode"
-                    class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[170px]">
+                    class="w-full sm:w-auto border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[170px]">
                     <option value="">— Semua Periode —</option>
                     @foreach ($availablePeriodes as $p)
                         @php
@@ -223,11 +200,11 @@
             </div>
 
             {{-- Sort --}}
-            <div class="flex-shrink-0">
+            <div class="w-full sm:w-auto flex-shrink-0">
                 <label
                     class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Urutkan</label>
                 <select name="sort"
-                    class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[170px]">
+                    class="w-full sm:w-auto border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[170px]">
                     <option value="periode_desc"
                         {{ request('sort', 'periode_desc') == 'periode_desc' ? 'selected' : '' }}>Periode Terbaru
                     </option>
@@ -241,9 +218,9 @@
             </div>
 
             {{-- Tombol --}}
-            <div class="flex gap-2 flex-shrink-0">
+            <div class="w-full sm:w-auto flex gap-2 flex-shrink-0">
                 <button type="submit"
-                    class="inline-flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                    class="w-full sm:w-auto justify-center inline-flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
@@ -252,7 +229,7 @@
                 </button>
                 @if (request('search') || request('periode') || request('sort'))
                     <a href="{{ route('kinerjas.index') }}"
-                        class="inline-flex items-center gap-1.5 border border-slate-300 text-slate-600 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+                        class="w-full sm:w-auto justify-center inline-flex items-center gap-1.5 border border-slate-300 text-slate-600 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -440,13 +417,13 @@
     </div>
 
     {{-- Create Modal --}}
-    <div class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-200"
+    <div class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-200 p-4"
         id="create-modal">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-bold text-slate-800 mb-6">Input Kinerja Bulanan</h3>
             <form method="POST" action="{{ route('kinerjas.store') }}">
                 @csrf
-                <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">Karyawan</label>
                         <select name="employee_id" required
@@ -538,11 +515,11 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 mt-8">
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-8">
                     <button type="button" onclick="closeModal('create-modal')"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Batal</button>
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Batal</button>
                     <button type="submit"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-500 text-white hover:bg-indigo-600 transition">Simpan
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-500 text-white hover:bg-indigo-600 transition">Simpan
                         Kinerja</button>
                 </div>
             </form>
@@ -550,13 +527,13 @@
     </div>
 
     {{-- Edit Modal --}}
-    <div class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-200"
+    <div class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-200 p-4"
         id="edit-modal">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-bold text-slate-800 mb-6">Edit Kinerja Bulanan</h3>
             <form method="POST" id="edit-form" action="">
                 @csrf @method('PUT')
-                <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">Karyawan</label>
                         <select id="e_employee" name="employee_id" required
@@ -620,11 +597,11 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 mt-8">
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-8">
                     <button type="button" onclick="closeModal('edit-modal')"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Batal</button>
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Batal</button>
                     <button type="submit"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-500 text-white hover:bg-indigo-600 transition">Simpan
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-500 text-white hover:bg-indigo-600 transition">Simpan
                         Perubahan</button>
                 </div>
             </form>
