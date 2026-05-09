@@ -140,6 +140,13 @@
                     Export Excel{{ request('periode') ? ' (' . request('periode') . ')' : '' }}
                 </a>
                 @if (auth()->user()->role->name === 'finance')
+                    <button onclick="openModal('delete-periode-modal')"
+                        class="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Hapus per Periode
+                    </button>
                     <button onclick="openModal('create-modal')"
                         class="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
@@ -616,6 +623,54 @@
         </div>
     </div>
 
+    {{-- Delete Periode Modal --}}
+    <div class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-200 p-4"
+        id="delete-periode-modal">
+        <div class="bg-white rounded-2xl p-5 sm:p-8 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-800 mb-6">Hapus Data Kinerja per Periode</h3>
+            <form method="POST" action="{{ route('kinerjas.destroyPeriode') }}">
+                @csrf @method('DELETE')
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Periode</label>
+                    <select name="periode" id="delete-periode-select" required
+                        class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition" placeholder="— Pilih Periode —">
+                        <option value="">— Pilih Periode —</option>
+                        @foreach ($availablePeriodes as $p)
+                            @php
+                                [$y, $m] = explode('-', $p);
+                                $bulan = [
+                                    '',
+                                    'Januari',
+                                    'Februari',
+                                    'Maret',
+                                    'April',
+                                    'Mei',
+                                    'Juni',
+                                    'Juli',
+                                    'Agustus',
+                                    'September',
+                                    'Oktober',
+                                    'November',
+                                    'Desember',
+                                ];
+                            @endphp
+                            <option value="{{ $p }}" {{ request('periode') == $p ? 'selected' : '' }}>
+                                {{ $bulan[(int) $m] }} {{ $y }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-2 text-xs text-slate-500">Semua data kinerja pada periode yang dipilih akan dihapus secara permanen.</p>
+                </div>
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-8">
+                    <button type="button" onclick="closeModal('delete-periode-modal')"
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition">Batal</button>
+                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus SEMUA data pada periode ini? Aksi ini tidak dapat dibatalkan.')"
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition">Hapus Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function openModal(id) {
             document.getElementById(id).classList.remove('opacity-0', 'pointer-events-none');
@@ -657,6 +712,20 @@
                 label.classList.remove('text-emerald-700', 'font-semibold');
             }
         }
+    </script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new TomSelect('#delete-periode-select', {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "desc"
+                }
+            });
+        });
     </script>
 
 </x-app-layout>

@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'show'])->name('kinerjas.show');
     Route::post('/kinerjas', [App\Http\Controllers\EmployeeKinerjaController::class, 'store'])->name('kinerjas.store');
     Route::post('/kinerjas/import', [App\Http\Controllers\EmployeeKinerjaController::class, 'importExcel'])->name('kinerjas.import');
+    Route::delete('/kinerjas/destroy-periode', [App\Http\Controllers\EmployeeKinerjaController::class, 'destroyPeriode'])->name('kinerjas.destroyPeriode');
     Route::put('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'update'])->name('kinerjas.update');
     Route::delete('/kinerjas/{kinerja}', [App\Http\Controllers\EmployeeKinerjaController::class, 'destroy'])->name('kinerjas.destroy');
     Route::patch('/kinerjas/{kinerja}/transfer', [EmployeeKinerjaController::class, 'transfer'])->name('kinerjas.transfer');
