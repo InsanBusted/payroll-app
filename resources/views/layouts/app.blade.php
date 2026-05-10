@@ -36,7 +36,7 @@
                 </div>
                 <div>
                     <div class="text-white font-bold text-sm">PayrollPro</div>
-                    <div class="text-slate-400 text-xs">Management Payroll</div>
+                    <div class="text-slate-400 text-xs">Management System</div>
                 </div>
             </div>
 
