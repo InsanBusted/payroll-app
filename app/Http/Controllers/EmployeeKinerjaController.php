@@ -103,8 +103,7 @@ class EmployeeKinerjaController extends Controller
             'pph21'           => $request->pph21 ?? 0,
         ]);
 
-        return redirect()->route('kinerjas.index')
-            ->with('success', 'Data kinerja berhasil ditambahkan.');
+        return back()->with('success', 'Data kinerja berhasil ditambahkan.');
     }
 
     public function update(Request $request, EmployeeKinerja $kinerja)
@@ -145,16 +144,31 @@ class EmployeeKinerjaController extends Controller
             'pph21'           => $request->pph21 ?? 0,
         ]);
 
-        return redirect()->route('kinerjas.index')
-            ->with('success', 'Data kinerja berhasil diperbarui.');
+        return back()->with('success', 'Data kinerja berhasil diperbarui.');
     }
 
     public function destroy(EmployeeKinerja $kinerja)
     {
-        $kinerja->delete($kinerja->id);
+        $kinerja->delete();
 
-        return redirect()->route('kinerjas.index')
-            ->with('success', 'Data kinerja berhasil dihapus.');
+        return back()->with('success', 'Data kinerja berhasil dihapus.');
+    }
+
+    public function destroyPeriode(Request $request)
+    {
+        $request->validate([
+            'periode' => 'required|string|max:7',
+        ]);
+
+        $count = EmployeeKinerja::where('periode', $request->periode)->count();
+
+        if ($count === 0) {
+            return back()->with('warning', 'Tidak ada data kinerja pada periode tersebut.');
+        }
+
+        EmployeeKinerja::where('periode', $request->periode)->delete();
+
+        return back()->with('success', "Berhasil menghapus {$count} data kinerja pada periode {$request->periode}.");
     }
 
     public function importExcel(Request $request)
