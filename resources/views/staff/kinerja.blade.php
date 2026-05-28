@@ -166,27 +166,20 @@
                     {{-- Status --}}
                     <div class="flex flex-wrap gap-2 mt-2">
 
-                        @if ($kinerja->status_gaji)
-                            <span
-                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                                Sudah Transfer
-                            </span>
-                        @else
+                        @if (!$kinerja->status_gaji)
                             <span
                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
                                 Belum Transfer
                             </span>
-                        @endif
-
-                        @if ($kinerja->status_diterima)
+                        @elseif (!$kinerja->status_diterima)
                             <span
-                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
-                                Sudah Diterima
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-100">
+                                Belum Diterima
                             </span>
                         @else
                             <span
-                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
-                                Belum Diterima
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                                Sudah Diterima
                             </span>
                         @endif
 

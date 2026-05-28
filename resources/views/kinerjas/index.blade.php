@@ -132,12 +132,13 @@
             <h2 class="font-bold text-slate-800 text-center sm:text-left">Daftar Kinerja Bulanan</h2>
             <div class="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                 <a href="{{ route('kinerjas.export', array_filter(['periode' => request('periode')])) }}"
-                    class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
+                    class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 11v6m-3-3h6" />
                     </svg>
-                    Export Excel{{ request('periode') ? ' (' . request('periode') . ')' : '' }}
+                    Export PDF{{ request('periode') ? ' (' . request('periode') . ')' : '' }}
                 </a>
                 @if (auth()->user()->role->name === 'finance')
                     <button onclick="openModal('delete-periode-modal')"
@@ -346,33 +347,22 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="space-y-1">
-
-                                    {{-- Status Transfer --}}
-                                    @if ($k->status_gaji)
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-semibold">
-                                            Sudah Transfer
-                                        </span>
-                                    @else
+                                    @if (!$k->status_gaji)
                                         <span
                                             class="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-semibold">
                                             Belum Transfer
                                         </span>
-                                    @endif
-
-                                    {{-- Status Diterima --}}
-                                    @if ($k->status_diterima)
+                                    @elseif (!$k->status_diterima)
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-100">
+                                            Belum Diterima
+                                        </span>
+                                    @else
                                         <span
                                             class="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-semibold">
                                             Sudah Diterima
                                         </span>
-                                    @else
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">
-                                            Belum Diterima
-                                        </span>
                                     @endif
-
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap">

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Imports\EmployeeKinerjaImport;
-use App\Exports\EmployeeKinerjaExport;
 use App\Models\Employee;
 use App\Models\EmployeeKinerja;
 use Illuminate\Http\Request;
@@ -249,10 +248,23 @@ class EmployeeKinerjaController extends Controller
     {
         $periode = $request->input('periode');
 
-        $filename = $periode
-            ? 'laporan-kinerja-' . $periode . '.xlsx'
-            : 'laporan-kinerja-semua.xlsx';
+        $query = EmployeeKinerja::with(['employee.jabatan', 'employee.area'])
+            ->when($periode, fn($q) => $q->where('periode', $periode))
+            ->join('employees', 'employee_kinerjas.employee_id', '=', 'employees.id')
+            ->orderBy('periode', 'desc')
+            ->orderBy('employees.nama', 'asc')
+            ->select('employee_kinerjas.*');
 
-        return Excel::download(new EmployeeKinerjaExport($periode), $filename);
+        $kinerjas = $query->get();
+        $setting  = \App\Models\SettingGaji::first();
+
+        $filename = $periode
+            ? 'laporan-kinerja-' . $periode . '.pdf'
+            : 'laporan-kinerja-semua.pdf';
+
+        $pdf = Pdf::loadView('kinerjas.kinerja-report-pdf', compact('kinerjas', 'periode', 'setting'))
+            ->setPaper('A4', 'landscape');
+
+        return $pdf->download($filename);
     }
 }
