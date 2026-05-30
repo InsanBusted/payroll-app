@@ -193,7 +193,7 @@
 
     {{-- ══ Header ══ --}}
     <div class="header">
-        <div class="header-title">Recap Gaji Karyawan</div>
+        <div class="header-title">Rekap Gaji Karyawan</div>
         @if ($periode)
             @php
                 [$y, $m] = explode('-', $periode);
@@ -204,7 +204,7 @@
         @else
             <div class="header-subtitle">Semua Periode</div>
         @endif
-        <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y, H:i') }} WIB &nbsp;|&nbsp; Total Data: {{ count($kinerjas) }} karyawan</div>
+        <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y') }} WIB &nbsp;|&nbsp; Total Data: {{ count($kinerjas) }} karyawan</div>
     </div>
 
     {{-- ══ Table ══ --}}
