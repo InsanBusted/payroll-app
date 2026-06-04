@@ -194,8 +194,6 @@
 </head>
 <body>
 <div class="page">
-
-    {{-- ══ Header ══ --}}
     <div class="header">
         <div class="header-title">Rekap Gaji Karyawan</div>
         @if ($periode)
@@ -206,12 +204,12 @@
             @endphp
             <div class="header-subtitle">Periode: {{ $bulan[(int)$m] }} {{ $y }}</div>
         @else
+            @php $y = null; $m = null; $bulan = []; @endphp
             <div class="header-subtitle">Semua Periode</div>
         @endif
         <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y') }} WIB &nbsp;|&nbsp; Total Data: {{ count($kinerjas) }} karyawan</div>
     </div>
 
-    {{-- ══ Table ══ --}}
     <table>
         <thead>
             <tr>
@@ -241,6 +239,7 @@
                 $totalGajiPokok  = 0;
                 $totalPph        = 0;
                 $totalBpjs       = 0;
+                $kinerjaCount    = count($kinerjas);
             @endphp
             @forelse ($kinerjas as $i => $row)
                 @php
@@ -256,21 +255,23 @@
                     $totalPph       += $pph;
                     $totalBpjs      += $bpjsPotongan;
 
-                    // Setting rates
                     $rateGroom  = $setting->rate_tunjangan_groom ?? 0;
                     $rateSrp    = $setting->rate_srp ?? 0;
                     $rateGrosir = $setting->rate_grosir ?? 0;
                     $rateAkses  = $setting->rate_aksesoris ?? 0;
 
-                    // Nilai hasil
                     $nilaiGroom  = $row->tunjangan_groom * $rateGroom;
                     $isSales     = stripos($row->employee->jabatan->nama ?? '', 'sales') !== false;
                     $nilaiSrp    = $isSales ? $row->srp * $rateSrp : 0;
                     $nilaiGrosir = $isSales ? $row->grosir * $rateGrosir : 0;
                     $nilaiAkses  = $isSales ? $row->aksesoris * $rateAkses : 0;
+
+                    $rowNum   = $i + 1;
+                    $isLast   = ($rowNum === $kinerjaCount);
+                    $isRowTen = ($rowNum % 10 === 0);
                 @endphp
                 <tr>
-                    <td class="text-center">{{ $i + 1 }}</td>
+                    <td class="text-center">{{ $rowNum }}</td>
                     <td class="text-center">{{ $row->periode }}</td>
                     <td class="text-left font-bold">{{ $row->employee->nama ?? '-' }}</td>
                     <td class="text-center">{{ $row->employee->nik ?? '-' }}</td>
@@ -281,14 +282,10 @@
                         <span class="calc-result">Rp {{ number_format($gajiPokok, 0, ',', '.') }}</span>
                         <span class="calc-formula">{{ $row->total_hadir }} &times; {{ number_format($rateHarian, 0, ',', '.') }}</span>
                     </td>
-
-                    {{-- Tunjangan Groom --}}
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($nilaiGroom, 0, ',', '.') }}</span>
                         <span class="calc-formula">{{ $row->tunjangan_groom }} &times; {{ number_format($rateGroom, 0, ',', '.') }}</span>
                     </td>
-
-                    {{-- SRP --}}
                     <td class="text-right">
                         @if ($isSales)
                             <span class="calc-result">Rp {{ number_format($nilaiSrp, 0, ',', '.') }}</span>
@@ -297,8 +294,6 @@
                             <span class="na-text">Non Sales</span>
                         @endif
                     </td>
-
-                    {{-- Grosir --}}
                     <td class="text-right">
                         @if ($isSales)
                             <span class="calc-result">Rp {{ number_format($nilaiGrosir, 0, ',', '.') }}</span>
@@ -307,8 +302,6 @@
                             <span class="na-text">Non Sales</span>
                         @endif
                     </td>
-
-                    {{-- Aksesoris --}}
                     <td class="text-right">
                         @if ($isSales)
                             <span class="calc-result">Rp {{ number_format($nilaiAkses, 0, ',', '.') }}</span>
@@ -317,13 +310,9 @@
                             <span class="na-text">Non Sales</span>
                         @endif
                     </td>
-
                     <td class="text-right">Rp {{ number_format($row->bonus, 0, ',', '.') }}</td>
                     <td class="text-center">{{ $row->absensi }} hr</td>
-
-                    {{-- Potongan BPJS --}}
                     <td class="text-right" style="color:#b45309;">Rp {{ number_format($bpjsPotongan, 0, ',', '.') }}</td>
-
                     <td class="text-right">Rp {{ number_format($pph, 0, ',', '.') }}</td>
                     <td class="text-right font-bold">Rp {{ number_format($gajiB, 0, ',', '.') }}</td>
                     <td class="text-center">
@@ -336,51 +325,78 @@
                         @endif
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="18" class="text-center" style="padding: 20px; color: #aaa;">
-                        Tidak ada data kinerja.
-                    </td>
-                </tr>
-            @endforelse
 
-            
-            
-          
+                @if ($isRowTen && !$isLast)
+                </tbody>
+            </table>
+            <div class="footer">Laporan ini diterbitkan secara otomatis oleh sistem payroll.</div>
+        </div>
+        <div style="page-break-after: always;"></div>
+        <div class="page">
+            <div class="header">
+                <div class="header-title">Rekap Gaji Karyawan</div>
+                <div class="header-subtitle">Periode: {{ $m ? $bulan[(int)$m] . ' ' . $y : 'Semua Periode' }}</div>
+                <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y') }} WIB &nbsp;|&nbsp; Total Data: {{ $kinerjaCount }} karyawan</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:2%">No</th>
+                        <th class="text-left"   style="width:5%">Periode</th>
+                        <th class="text-left"   style="width:10%">Nama Karyawan</th>
+                        <th class="text-center" style="width:5%">NIK</th>
+                        <th class="text-left"   style="width:8%">Jabatan</th>
+                        <th class="text-left"   style="width:5%">Area</th>
+                        <th class="text-center" style="width:3%">Hadir</th>
+                        <th class="text-right"  style="width:8%">Gaji Pokok</th>
+                        <th class="text-right"  style="width:8%">Tunj. Groom</th>
+                        <th class="text-right"  style="width:7%">SRP</th>
+                        <th class="text-right"  style="width:7%">Grosir</th>
+                        <th class="text-right"  style="width:7%">Aksesoris</th>
+                        <th class="text-right"  style="width:5%">Bonus</th>
+                        <th class="text-center" style="width:3%">Absensi</th>
+                        <th class="text-right"  style="width:6%">Pot. BPJS</th>
+                        <th class="text-right"  style="width:5%">PPh 21</th>
+                        <th class="text-right"  style="width:7%">Gaji Bersih</th>
+                        <th class="text-center" style="width:7%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @endif
+            @empty
+                <tr><td colspan="18" class="text-center" style="padding: 20px; color: #aaa;">Tidak ada data kinerja.</td></tr>
+            @endforelse
         </tbody>
     </table>
-@if (count($kinerjas) > 0)
-   <div class="summary-box">
-       <div class="summary-item">
-           <div class="summary-label">Total Gaji Pokok</div>
-           <div class="summary-value">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</div>
-       </div>
-       <div class="summary-sep"></div>
-       <div class="summary-item amber">
-           <div class="summary-label">Total Potongan BPJS</div>
-           <div class="summary-value">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</div>
-       </div>
-       <div class="summary-sep"></div>
-       <div class="summary-item amber">
-           <div class="summary-label">Total PPh 21 Seluruh Karyawan</div>
-           <div class="summary-value">Rp {{ number_format($totalPph, 0, ',', '.') }}</div>
-       </div>
-       <div class="summary-sep"></div>
-       <div class="summary-item green">
-           <div class="summary-label">Total Gaji Bersih Seluruh Karyawan</div>
-           <div class="summary-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
-       </div>
-   </div>
-   @endif
-    {{-- ══ Summary Box ══ --}}
-   
 
-    {{-- ══ Footer ══ --}}
+    @if (count($kinerjas) > 0)
+        <div class="summary-box">
+            <div class="summary-item">
+                <div class="summary-label">Total Gaji Pokok</div>
+                <div class="summary-value">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</div>
+            </div>
+            <div class="summary-sep"></div>
+            <div class="summary-item amber">
+                <div class="summary-label">Total Potongan BPJS</div>
+                <div class="summary-value">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</div>
+            </div>
+            <div class="summary-sep"></div>
+            <div class="summary-item amber">
+                <div class="summary-label">Total PPh 21</div>
+                <div class="summary-value">Rp {{ number_format($totalPph, 0, ',', '.') }}</div>
+            </div>
+            <div class="summary-sep"></div>
+            <div class="summary-item green">
+                <div class="summary-label">Total Gaji Bersih</div>
+                <div class="summary-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
+            </div>
+        </div>
+    @endif
+
     <div class="footer">
         Laporan ini diterbitkan secara otomatis oleh sistem payroll.
         Dokumen ini sah tanpa tanda tangan basah apabila dicetak dari sistem resmi.
     </div>
-
 </div>
 </body>
 </html>
