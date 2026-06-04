@@ -128,8 +128,6 @@
             border-top: 2px solid #1e3a5f;
         }
 
-
-
         /* ── Calc Formula ── */
         .calc-formula {
             font-size: 7.5px;
@@ -186,6 +184,12 @@
             width: 1px;
             background: rgba(255,255,255,0.2);
         }
+        .summary-item.amber {
+            background: #b45309;
+        }
+        .summary-item.green {
+            background: #14532d;
+        }
     </style>
 </head>
 <body>
@@ -218,22 +222,25 @@
                 <th class="text-left"   style="width:8%">Jabatan</th>
                 <th class="text-left"   style="width:5%">Area</th>
                 <th class="text-center" style="width:3%">Hadir</th>
-                <th class="text-right"  style="width:9%">Gaji Pokok</th>
-                <th class="text-right"  style="width:9%">Tunj. Groom</th>
-                <th class="text-right"  style="width:8%">SRP</th>
-                <th class="text-right"  style="width:8%">Grosir</th>
-                <th class="text-right"  style="width:8%">Aksesoris</th>
+                <th class="text-right"  style="width:8%">Gaji Pokok</th>
+                <th class="text-right"  style="width:8%">Tunj. Groom</th>
+                <th class="text-right"  style="width:7%">SRP</th>
+                <th class="text-right"  style="width:7%">Grosir</th>
+                <th class="text-right"  style="width:7%">Aksesoris</th>
                 <th class="text-right"  style="width:5%">Bonus</th>
-                <th class="text-center" style="width:4%">Absensi</th>
+                <th class="text-center" style="width:3%">Absensi</th>
+                <th class="text-right"  style="width:6%">Pot. BPJS</th>
                 <th class="text-right"  style="width:5%">PPh 21</th>
-                <th class="text-right"  style="width:8%">Gaji Bersih</th>
+                <th class="text-right"  style="width:7%">Gaji Bersih</th>
                 <th class="text-center" style="width:7%">Status</th>
             </tr>
         </thead>
         <tbody>
             @php
-                $totalGaji      = 0;
-                $totalGajiPokok = 0;
+                $totalGaji       = 0;
+                $totalGajiPokok  = 0;
+                $totalPph        = 0;
+                $totalBpjs       = 0;
             @endphp
             @forelse ($kinerjas as $i => $row)
                 @php
@@ -241,21 +248,26 @@
                     $pph        = $row->hitungListPph21($row->employee_id);
                     $rateHarian = $row->employee->jabatan->rate_gaji_pokok ?? 0;
                     $gajiPokok  = $row->total_hadir * $rateHarian;
+                    $rincian    = $row->rincianGajiList($row->employee_id);
+                    $bpjsPotongan = $rincian['potongan']['bpjstk'] ?? 0;
+
                     $totalGaji      += $gajiB;
                     $totalGajiPokok += $gajiPokok;
+                    $totalPph       += $pph;
+                    $totalBpjs      += $bpjsPotongan;
 
                     // Setting rates
-                    $rateGroom    = $setting->rate_tunjangan_groom ?? 0;
-                    $rateSrp      = $setting->rate_srp ?? 0;
-                    $rateGrosir   = $setting->rate_grosir ?? 0;
-                    $rateAkses    = $setting->rate_aksesoris ?? 0;
+                    $rateGroom  = $setting->rate_tunjangan_groom ?? 0;
+                    $rateSrp    = $setting->rate_srp ?? 0;
+                    $rateGrosir = $setting->rate_grosir ?? 0;
+                    $rateAkses  = $setting->rate_aksesoris ?? 0;
 
                     // Nilai hasil
-                    $nilaiGroom   = $row->tunjangan_groom * $rateGroom;
-                    $isSales      = stripos($row->employee->jabatan->nama ?? '', 'sales') !== false;
-                    $nilaiSrp     = $isSales ? $row->srp * $rateSrp : 0;
-                    $nilaiGrosir  = $isSales ? $row->grosir * $rateGrosir : 0;
-                    $nilaiAkses   = $isSales ? $row->aksesoris * $rateAkses : 0;
+                    $nilaiGroom  = $row->tunjangan_groom * $rateGroom;
+                    $isSales     = stripos($row->employee->jabatan->nama ?? '', 'sales') !== false;
+                    $nilaiSrp    = $isSales ? $row->srp * $rateSrp : 0;
+                    $nilaiGrosir = $isSales ? $row->grosir * $rateGrosir : 0;
+                    $nilaiAkses  = $isSales ? $row->aksesoris * $rateAkses : 0;
                 @endphp
                 <tr>
                     <td class="text-center">{{ $i + 1 }}</td>
@@ -308,6 +320,10 @@
 
                     <td class="text-right">Rp {{ number_format($row->bonus, 0, ',', '.') }}</td>
                     <td class="text-center">{{ $row->absensi }} hr</td>
+
+                    {{-- Potongan BPJS --}}
+                    <td class="text-right" style="color:#b45309;">Rp {{ number_format($bpjsPotongan, 0, ',', '.') }}</td>
+
                     <td class="text-right">Rp {{ number_format($pph, 0, ',', '.') }}</td>
                     <td class="text-right font-bold">Rp {{ number_format($gajiB, 0, ',', '.') }}</td>
                     <td class="text-center">
@@ -322,7 +338,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="16" class="text-center" style="padding: 20px; color: #aaa;">
+                    <td colspan="18" class="text-center" style="padding: 20px; color: #aaa;">
                         Tidak ada data kinerja.
                     </td>
                 </tr>
@@ -330,16 +346,44 @@
 
             {{-- Summary / Total Row --}}
             @if (count($kinerjas) > 0)
-            <tr class="summary-row">
+            <!-- <tr class="summary-row">
                 <td colspan="7" class="text-right">Total Gaji Pokok:</td>
                 <td class="text-right">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</td>
-                <td colspan="7" class="text-right">Total Gaji Bersih Seluruh Karyawan:</td>
+                <td colspan="5"></td>
+                <td></td>
+                <td class="text-right" style="color:#b45309;">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalPph, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalGaji, 0, ',', '.') }}</td>
                 <td></td>
-            </tr>
+            </tr> -->
             @endif
         </tbody>
     </table>
+
+    {{-- ══ Summary Box ══ --}}
+    @if (count($kinerjas) > 0)
+    <div class="summary-box">
+        <div class="summary-item">
+            <div class="summary-label">Total Gaji Pokok</div>
+            <div class="summary-value">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</div>
+        </div>
+        <div class="summary-sep"></div>
+        <div class="summary-item amber">
+            <div class="summary-label">Total Potongan BPJS</div>
+            <div class="summary-value">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</div>
+        </div>
+        <div class="summary-sep"></div>
+        <div class="summary-item amber">
+            <div class="summary-label">Total PPh 21 Seluruh Karyawan</div>
+            <div class="summary-value">Rp {{ number_format($totalPph, 0, ',', '.') }}</div>
+        </div>
+        <div class="summary-sep"></div>
+        <div class="summary-item green">
+            <div class="summary-label">Total Gaji Bersih Seluruh Karyawan</div>
+            <div class="summary-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
+        </div>
+    </div>
+    @endif
 
     {{-- ══ Footer ══ --}}
     <div class="footer">
