@@ -344,46 +344,36 @@
                 </tr>
             @endforelse
 
-            {{-- Summary / Total Row --}}
-            @if (count($kinerjas) > 0)
-            <!-- <tr class="summary-row">
-                <td colspan="7" class="text-right">Total Gaji Pokok:</td>
-                <td class="text-right">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</td>
-                <td colspan="5"></td>
-                <td></td>
-                <td class="text-right" style="color:#b45309;">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</td>
-                <td class="text-right">Rp {{ number_format($totalPph, 0, ',', '.') }}</td>
-                <td class="text-right">Rp {{ number_format($totalGaji, 0, ',', '.') }}</td>
-                <td></td>
-            </tr> -->
-            @endif
+            
+            
+          
         </tbody>
     </table>
-
+@if (count($kinerjas) > 0)
+   <div class="summary-box">
+       <div class="summary-item">
+           <div class="summary-label">Total Gaji Pokok</div>
+           <div class="summary-value">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</div>
+       </div>
+       <div class="summary-sep"></div>
+       <div class="summary-item amber">
+           <div class="summary-label">Total Potongan BPJS</div>
+           <div class="summary-value">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</div>
+       </div>
+       <div class="summary-sep"></div>
+       <div class="summary-item amber">
+           <div class="summary-label">Total PPh 21 Seluruh Karyawan</div>
+           <div class="summary-value">Rp {{ number_format($totalPph, 0, ',', '.') }}</div>
+       </div>
+       <div class="summary-sep"></div>
+       <div class="summary-item green">
+           <div class="summary-label">Total Gaji Bersih Seluruh Karyawan</div>
+           <div class="summary-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
+       </div>
+   </div>
+   @endif
     {{-- ══ Summary Box ══ --}}
-    @if (count($kinerjas) > 0)
-    <div class="summary-box">
-        <div class="summary-item">
-            <div class="summary-label">Total Gaji Pokok</div>
-            <div class="summary-value">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</div>
-        </div>
-        <div class="summary-sep"></div>
-        <div class="summary-item amber">
-            <div class="summary-label">Total Potongan BPJS</div>
-            <div class="summary-value">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</div>
-        </div>
-        <div class="summary-sep"></div>
-        <div class="summary-item amber">
-            <div class="summary-label">Total PPh 21 Seluruh Karyawan</div>
-            <div class="summary-value">Rp {{ number_format($totalPph, 0, ',', '.') }}</div>
-        </div>
-        <div class="summary-sep"></div>
-        <div class="summary-item green">
-            <div class="summary-label">Total Gaji Bersih Seluruh Karyawan</div>
-            <div class="summary-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
-        </div>
-    </div>
-    @endif
+   
 
     {{-- ══ Footer ══ --}}
     <div class="footer">
