@@ -143,7 +143,7 @@
             font-weight: bold;
             border-top: 2px solid #1e3a5f;
         }
-        tfoot tr.tfoot-komponen td.potongan {
+        tfoot tr td.potongan {
             color: #b45309;
         }
         tfoot tr.tfoot-komponen td.label-cell {
@@ -379,7 +379,14 @@
                         @endif
                     </td>
                     <td class="text-right">Rp {{ number_format($row->bonus, 0, ',', '.') }}</td>
-                    <td class="text-center">{{ $row->absensi }} hr</td>
+                    <td class="text-right" style="color:#b45309;">
+                        @php
+                            $rateAbsensi = $setting->potongan_absensi ?? 0;
+                            $nilaiAbsensi = $row->absensi * $rateAbsensi;
+                        @endphp
+                        <span class="calc-result">Rp {{ number_format($nilaiAbsensi, 0, ',', '.') }}</span>
+                        <span class="calc-formula">{{ $row->absensi }} hr &times; {{ number_format($rateAbsensi, 0, ',', '.') }}</span>
+                    </td>
                     <td class="text-right" style="color:#b45309;">Rp {{ number_format($bpjsPotongan, 0, ',', '.') }}</td>
                     <td class="text-right">Rp {{ number_format($pph, 0, ',', '.') }}</td>
                     <td class="text-right font-bold">Rp {{ number_format($gajiB, 0, ',', '.') }}</td>
@@ -445,50 +452,31 @@
                 <td class="text-right">Rp {{ number_format($totalGrosir, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalAkses, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalBonus, 0, ',', '.') }}</td>
-                <td class="text-center">-</td>
+                <td class="text-right potongan">Rp {{ number_format($totalAbsensi, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalPph, 0, ',', '.') }}</td>
                 <td class="text-right">-</td>
                 <td class="text-center">-</td>
             </tr>
             <tr class="tfoot-total">
-                <td colspan="7" class="label-cell">Total Bruto - Potongan = Gaji Bersih</td>
-                <td colspan="5" class="bruto-cell">
+                <td colspan="7" class="label-cell">Ringkasan Total</td>
+                <td colspan="6" class="text-right bruto-cell">
+                    <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #4b5563; margin-bottom: 2px;">Total Bruto</span>
                     Rp {{ number_format($totalBruto, 0, ',', '.') }}
-                    &nbsp;-&nbsp;
-                    Rp {{ number_format($totalPotongan, 0, ',', '.') }}
-                    &nbsp;=
                 </td>
-                <td colspan="2" class="result-cell">Rp {{ number_format($totalGaji, 0, ',', '.') }}</td>
-                <td colspan="4" class="empty-cell"></td>
+                <td colspan="3" class="text-right potongan">
+                    <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #b45309; margin-bottom: 2px;">Total Potongan</span>
+                    Rp {{ number_format($totalPotongan, 0, ',', '.') }}
+                </td>
+                <td colspan="1" class="result-cell">
+                    <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #16a34a; margin-bottom: 2px;">Total Gaji Bersih</span>
+                    Rp {{ number_format($totalGaji, 0, ',', '.') }}
+                </td>
+                <td colspan="1" class="empty-cell"></td>
             </tr>
         </tfoot>
         @endif
     </table>
-
-    <!-- @if (count($kinerjas) > 0)
-        <div class="summary-box">
-            <div class="summary-item">
-                <div class="summary-label">Total Gaji Pokok</div>
-                <div class="summary-value">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</div>
-            </div>
-            <div class="summary-sep"></div>
-            <div class="summary-item amber">
-                <div class="summary-label">Total Potongan BPJS</div>
-                <div class="summary-value">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</div>
-            </div>
-            <div class="summary-sep"></div>
-            <div class="summary-item amber">
-                <div class="summary-label">Total PPh 21</div>
-                <div class="summary-value">Rp {{ number_format($totalPph, 0, ',', '.') }}</div>
-            </div>
-            <div class="summary-sep"></div>
-            <div class="summary-item green">
-                <div class="summary-label">Total Gaji Bersih</div>
-                <div class="summary-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
-            </div>
-        </div>
-    @endif -->
 
     <div class="footer">
         Laporan ini diterbitkan secara otomatis oleh sistem payroll.
