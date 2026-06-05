@@ -119,8 +119,8 @@
                         Laporan Kinerja Karyawan
                     </a>
 
-                    {{-- Menu Status Rekap — finance bisa lihat read-only --}}
-                    @if (Auth::user()->hasRole('finance'))
+                    {{-- Menu Status Rekap — finance / superadmin bisa lihat read-only --}}
+                    @if (Auth::user()->hasRole('finance') || Auth::user()->hasRole('superadmin'))
                         <a href="{{ route('rekap_periodes.index') }}"
                             class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                               {{ request()->routeIs('rekap_periodes.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">

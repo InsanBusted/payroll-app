@@ -15,8 +15,8 @@ class EnsureRekapViewer
     {
         $role = $request->user()?->role?->name;
 
-        if (!in_array($role, ['direktur', 'finance'])) {
-            abort(403, 'Halaman ini hanya dapat diakses oleh Direktur atau Finance.');
+        if (!in_array($role, ['direktur', 'finance', 'superadmin'])) {
+            abort(403, 'Halaman ini hanya dapat diakses oleh Direktur, Finance, atau Superadmin.');
         }
 
         return $next($request);
