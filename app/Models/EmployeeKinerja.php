@@ -54,7 +54,8 @@ class EmployeeKinerja extends Model
         }
 
         $rateGajiPokok = $employee->jabatan->rate_gaji_pokok;
-        $isSales = stripos($employee->jabatan->nama, 'sales') !== false;
+        $isSales = stripos($employee->jabatan->nama, 'sales') !== false
+                || stripos($employee->jabatan->nama, 'kepala toko') !== false;
 
         $gajiPokok          = $this->total_hadir * $rateGajiPokok;
         $tunjanganKerapihan = $this->tunjangan_groom * $setting->rate_tunjangan_groom;
@@ -204,7 +205,8 @@ class EmployeeKinerja extends Model
         }
 
         $rateGajiPokok = $employee->jabatan->rate_gaji_pokok ?? 0;
-        $isSales       = stripos($employee->jabatan->nama, 'sales') !== false;
+        $isSales       = stripos($employee->jabatan->nama, 'sales') !== false
+                      || stripos($employee->jabatan->nama, 'kepala toko') !== false;
 
         return [
             'pendapatan' => [
@@ -236,7 +238,8 @@ class EmployeeKinerja extends Model
         }
 
         $rateGajiPokok = $employee->jabatan->rate_gaji_pokok ?? 0;
-        $isSales       = stripos($employee->jabatan->nama, 'sales') !== false;
+        $isSales       = stripos($employee->jabatan->nama, 'sales') !== false
+                      || stripos($employee->jabatan->nama, 'kepala toko') !== false;
 
         return [
             'pendapatan' => [
