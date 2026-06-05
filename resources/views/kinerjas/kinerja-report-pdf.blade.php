@@ -261,7 +261,8 @@
                     $rateAkses  = $setting->rate_aksesoris ?? 0;
 
                     $nilaiGroom  = $row->tunjangan_groom * $rateGroom;
-                    $isSales     = stripos($row->employee->jabatan->nama ?? '', 'sales') !== false;
+                    $isSales     = stripos($row->employee->jabatan->nama ?? '', 'sales') !== false
+                                || stripos($row->employee->jabatan->nama ?? '', 'kepala toko') !== false;
                     $nilaiSrp    = $isSales ? $row->srp * $rateSrp : 0;
                     $nilaiGrosir = $isSales ? $row->grosir * $rateGrosir : 0;
                     $nilaiAkses  = $isSales ? $row->aksesoris * $rateAkses : 0;
