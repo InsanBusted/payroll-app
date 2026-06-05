@@ -101,4 +101,18 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+
+Route::get('/secret-migrate', function () {
+    abort_unless(
+        request()->get('key') === env('MIGRATE_KEY'),
+        403
+    );
+
+    Artisan::call('migrate', [
+        '--force' => true
+    ]);
+
+    return nl2br(Artisan::output());
+});
+
 require __DIR__ . '/auth.php';
