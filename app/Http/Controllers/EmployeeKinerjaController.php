@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Imports\EmployeeKinerjaImport;
 use App\Models\Employee;
 use App\Models\EmployeeKinerja;
+use App\Models\RekapPeriode;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -45,7 +46,6 @@ class EmployeeKinerjaController extends Controller
 
         $kinerjas  = $query->paginate(10)->withQueryString();
         $employees = Employee::with('jabatan')->orderBy('nama', 'asc')->get();
-        // dd($employees);
 
         // Daftar periode yang ada di DB untuk dropdown filter
         $availablePeriodes = EmployeeKinerja::select('periode')
@@ -53,7 +53,12 @@ class EmployeeKinerjaController extends Controller
             ->orderBy('periode', 'desc')
             ->pluck('periode');
 
-        return view('kinerjas.index', compact('kinerjas', 'employees', 'availablePeriodes'));
+        // Daftar periode yang sudah di-approve direktur
+        $approvedPeriodes = RekapPeriode::where('is_approved', true)
+            ->pluck('periode')
+            ->toArray();
+
+        return view('kinerjas.index', compact('kinerjas', 'employees', 'availablePeriodes', 'approvedPeriodes'));
     }
 
     public function show(EmployeeKinerja $kinerja)
@@ -184,6 +189,12 @@ class EmployeeKinerjaController extends Controller
         $import = new EmployeeKinerjaImport($request->periode);
         Excel::import($import, $request->file('file'));
 
+        // Auto-create rekap periode jika belum ada (jangan reset is_approved jika sudah ada)
+        RekapPeriode::firstOrCreate(
+            ['periode' => $request->periode],
+            ['is_approved' => false]
+        );
+
         $msg = "Import selesai: {$import->importedCount} data baru, {$import->updatedCount} diperbarui, {$import->skippedCount} dilewati.";
 
         if (!empty($import->errors)) {
@@ -227,6 +238,13 @@ class EmployeeKinerjaController extends Controller
 
     public function transfer(EmployeeKinerja $kinerja)
     {
+        // Cek apakah rekap periode ini sudah di-approve direktur
+        $rekap = RekapPeriode::where('periode', $kinerja->periode)->first();
+
+        if (!$rekap || !$rekap->is_approved) {
+            return back()->with('error', 'Rekap periode ' . $kinerja->periode . ' belum disetujui oleh Direktur. Hubungi Direktur untuk melakukan approval terlebih dahulu.');
+        }
+
         $kinerja->update([
             'status_gaji'    => true,
             'transferred_by' => \Illuminate\Support\Facades\Auth::id(),

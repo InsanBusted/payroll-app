@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeeKinerjaController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RekapPeriodeController;
 use App\Http\Controllers\StaffKinerjaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/kinerjas/{id}/slip/download', [EmployeeKinerjaController::class, 'downloadSlip'])
         ->name('kinerjas.slip.download');
+
+    // Rekap Periode — view untuk direktur & finance, aksi hanya direktur
+    Route::middleware('rekap_viewer')->group(function () {
+        Route::get('/rekap-periodes', [RekapPeriodeController::class, 'index'])->name('rekap_periodes.index');
+        Route::get('/rekap-periodes/{rekapPeriode}', [RekapPeriodeController::class, 'show'])->name('rekap_periodes.show');
+    });
+    Route::middleware('direktur')->group(function () {
+        Route::patch('/rekap-periodes/{rekapPeriode}/approve', [RekapPeriodeController::class, 'approve'])->name('rekap_periodes.approve');
+        Route::post('/rekap-periodes/{rekapPeriode}/reject', [RekapPeriodeController::class, 'reject'])->name('rekap_periodes.reject');
+    });
 
     // Staff — hanya bisa akses kinerja milik sendiri
     Route::middleware('staff')->group(function () {

@@ -394,15 +394,22 @@
                                 @endif
                                 {{-- Finance konfirmasi transfer --}}
                                 @if (auth()->user()->role->name === 'finance' && !$k->status_gaji)
-                                    <form method="POST" action="{{ route('kinerjas.transfer', $k) }}"
-                                        class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors">
-                                            Sudah Transfer
-                                        </button>
-                                    </form>
+                                    @if (in_array($k->periode, $approvedPeriodes))
+                                        <form method="POST" action="{{ route('kinerjas.transfer', $k) }}"
+                                            class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors">
+                                                Sudah Transfer
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 text-xs font-semibold border border-amber-200" title="Menunggu persetujuan Direktur">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            Menunggu Approval
+                                        </span>
+                                    @endif
                                 @endif
                             </td>
                         </tr>

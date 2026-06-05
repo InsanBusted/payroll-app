@@ -128,6 +128,57 @@
             border-top: 2px solid #1e3a5f;
         }
 
+        /* ── Tfoot ── */
+        tfoot tr td {
+            padding: 5px 6px;
+            font-size: 9px;
+            border: 1px solid #b8c4d6;
+            vertical-align: middle;
+        }
+
+        /* Baris 1: total komponen */
+        tfoot tr.tfoot-komponen td {
+            background-color: #eef2f9;
+            color: #1e3a5f;
+            font-weight: bold;
+            border-top: 2px solid #1e3a5f;
+        }
+        tfoot tr.tfoot-komponen td.potongan {
+            color: #b45309;
+        }
+        tfoot tr.tfoot-komponen td.label-cell {
+            text-align: right;
+            font-size: 8px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        /* Baris 2: ringkasan bruto - potongan = bersih */
+        tfoot tr.tfoot-total td {
+            background-color: #eef2f9;
+            color: #1e3a5f;
+            font-weight: bold;
+            border-color: #b8c4d6;
+        }
+        tfoot tr.tfoot-total td.label-cell {
+            text-align: right;
+            font-size: 8px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        tfoot tr.tfoot-total td.bruto-cell {
+            text-align: right;
+            color: #1e3a5f;
+        }
+        tfoot tr.tfoot-total td.result-cell {
+            text-align: right;
+            color: #16a34a;
+            font-size: 10px;
+        }
+        tfoot tr.tfoot-total td.empty-cell {
+            background-color: #eef2f9;
+        }
+
         /* ── Calc Formula ── */
         .calc-formula {
             font-size: 7.5px;
@@ -237,8 +288,16 @@
             @php
                 $totalGaji       = 0;
                 $totalGajiPokok  = 0;
+                $totalGroom      = 0;
+                $totalSrp        = 0;
+                $totalGrosir     = 0;
+                $totalAkses      = 0;
+                $totalBonus      = 0;
+                $totalAbsensi    = 0;
                 $totalPph        = 0;
                 $totalBpjs       = 0;
+                $totalBruto      = 0;
+                $totalPotongan   = 0;
                 $kinerjaCount    = count($kinerjas);
             @endphp
             @forelse ($kinerjas as $i => $row)
@@ -249,11 +308,6 @@
                     $gajiPokok  = $row->total_hadir * $rateHarian;
                     $rincian    = $row->rincianGajiList($row->employee_id);
                     $bpjsPotongan = $rincian['potongan']['bpjstk'] ?? 0;
-
-                    $totalGaji      += $gajiB;
-                    $totalGajiPokok += $gajiPokok;
-                    $totalPph       += $pph;
-                    $totalBpjs      += $bpjsPotongan;
 
                     $rateGroom  = $setting->rate_tunjangan_groom ?? 0;
                     $rateSrp    = $setting->rate_srp ?? 0;
@@ -266,6 +320,19 @@
                     $nilaiSrp    = $isSales ? $row->srp * $rateSrp : 0;
                     $nilaiGrosir = $isSales ? $row->grosir * $rateGrosir : 0;
                     $nilaiAkses  = $isSales ? $row->aksesoris * $rateAkses : 0;
+
+                    $totalGaji      += $gajiB;
+                    $totalGajiPokok += $gajiPokok;
+                    $totalGroom     += $nilaiGroom;
+                    $totalSrp       += $nilaiSrp;
+                    $totalGrosir    += $nilaiGrosir;
+                    $totalAkses     += $nilaiAkses;
+                    $totalBonus     += $row->bonus;
+                    $totalAbsensi   += $rincian['potongan']['absensi'] ?? 0;
+                    $totalPph       += $pph;
+                    $totalBpjs      += $bpjsPotongan;
+                    $totalBruto     += ($gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus);
+                    $totalPotongan  += ($bpjsPotongan + ($rincian['potongan']['absensi'] ?? 0) + $pph);
 
                     $rowNum   = $i + 1;
                     $isLast   = ($rowNum === $kinerjaCount);
@@ -368,9 +435,38 @@
                 <tr><td colspan="18" class="text-center" style="padding: 20px; color: #aaa;">Tidak ada data kinerja.</td></tr>
             @endforelse
         </tbody>
+        @if (count($kinerjas) > 0)
+        <tfoot>
+            <tr class="tfoot-komponen">
+                <td colspan="7" class="label-cell">Total per Komponen</td>
+                <td class="text-right">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalGroom, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalSrp, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalGrosir, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalAkses, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalBonus, 0, ',', '.') }}</td>
+                <td class="text-center">-</td>
+                <td class="text-right potongan">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</td>
+                <td class="text-right potongan">Rp {{ number_format($totalPph, 0, ',', '.') }}</td>
+                <td class="text-right">-</td>
+                <td class="text-center">-</td>
+            </tr>
+            <tr class="tfoot-total">
+                <td colspan="7" class="label-cell">Total Bruto - Potongan = Gaji Bersih</td>
+                <td colspan="5" class="bruto-cell">
+                    Rp {{ number_format($totalBruto, 0, ',', '.') }}
+                    &nbsp;-&nbsp;
+                    Rp {{ number_format($totalPotongan, 0, ',', '.') }}
+                    &nbsp;=
+                </td>
+                <td colspan="2" class="result-cell">Rp {{ number_format($totalGaji, 0, ',', '.') }}</td>
+                <td colspan="4" class="empty-cell"></td>
+            </tr>
+        </tfoot>
+        @endif
     </table>
 
-    @if (count($kinerjas) > 0)
+    <!-- @if (count($kinerjas) > 0)
         <div class="summary-box">
             <div class="summary-item">
                 <div class="summary-label">Total Gaji Pokok</div>
@@ -392,7 +488,7 @@
                 <div class="summary-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
             </div>
         </div>
-    @endif
+    @endif -->
 
     <div class="footer">
         Laporan ini diterbitkan secara otomatis oleh sistem payroll.

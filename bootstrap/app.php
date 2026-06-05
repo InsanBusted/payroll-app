@@ -12,8 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
-            'staff'      => \App\Http\Middleware\EnsureStaff::class,
+            'superadmin'    => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'staff'         => \App\Http\Middleware\EnsureStaff::class,
+            'direktur'      => \App\Http\Middleware\EnsureDirektur::class,
+            'rekap_viewer'  => \App\Http\Middleware\EnsureRekapViewer::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

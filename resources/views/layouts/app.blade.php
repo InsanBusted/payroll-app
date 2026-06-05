@@ -57,7 +57,7 @@
                 </a>
 
                 @if (Auth::user()->hasRole('direktur'))
-                    {{-- ── Menu khusus Direktur: hanya Laporan Kinerja ── --}}
+                    {{-- ── Menu khusus Direktur: Laporan Kinerja + Approval Rekap ── --}}
                     <a href="{{ route('kinerjas.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
                           {{ request()->routeIs('kinerjas.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
@@ -67,6 +67,18 @@
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Laporan Kinerja Karyawan
+                        <span class="ml-auto text-[9px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-md">DIR</span>
+                    </a>
+
+                    <a href="{{ route('rekap_periodes.index') }}"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
+                          {{ request()->routeIs('rekap_periodes.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
+                        <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        Approval Rekap
                         <span class="ml-auto text-[9px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-md">DIR</span>
                     </a>
 
@@ -106,6 +118,21 @@
                         </svg>
                         Laporan Kinerja Karyawan
                     </a>
+
+                    {{-- Menu Status Rekap — finance bisa lihat read-only --}}
+                    @if (Auth::user()->hasRole('finance'))
+                        <a href="{{ route('rekap_periodes.index') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors flex-shrink-0
+                              {{ request()->routeIs('rekap_periodes.*') ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200' }}">
+                            <svg class="w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                            </svg>
+                            Status Rekap
+                            <span class="ml-auto text-[9px] font-bold bg-slate-500/20 text-slate-300 px-1.5 py-0.5 rounded-md">VIEW</span>
+                        </a>
+                    @endif
 
                     <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                         Administrasi</p>
