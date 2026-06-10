@@ -62,13 +62,17 @@ class EmployeeKinerja extends Model
         $valueSrp           = $isSales ? $this->srp * $setting->rate_srp : 0;
         $valueGrosir        = $isSales ? $this->grosir * $setting->rate_grosir : 0;
         $valueAksesoris     = $isSales ? $this->aksesoris * $setting->rate_aksesoris : 0;
+        $potonganAbsensi = $this->absensi * $setting->potongan_absensi;
 
-        return $gajiPokok
+
+        $gajiTotal = ($gajiPokok
             + $tunjanganKerapihan
             + $valueSrp
             + $valueGrosir
             + $valueAksesoris
-            + $this->bonus;
+            + $this->bonus) - $potonganAbsensi;
+
+        return $gajiTotal;
     }
 
     // untuk hitung total pph21
@@ -144,11 +148,11 @@ class EmployeeKinerja extends Model
         $setting = SettingGaji::query()->first();
         if (!$setting) return 0;
 
-        $potonganAbsensi = $this->absensi * $setting->potongan_absensi;
+        // $potonganAbsensi = $this->absensi * $setting->potongan_absensi;
         $potonganPph21   = $this->hitungTotalPph21();
 
 
-        return $this->hitungPotonganBpjstk($setting) + $potonganAbsensi + $potonganPph21;
+        return $this->hitungPotonganBpjstk($setting) + $potonganPph21;
     }
 
     /**
@@ -178,7 +182,7 @@ class EmployeeKinerja extends Model
 
         $masaKerja = Carbon::parse($this->employee->join_date)->diffInMonths(now());
         $bebasSampai = $setting->bebas_bpjstk_bulan ?? 3;
-
+ 
         // Kena BPJS jika masa kerja sudah >= batas bebas
         return $masaKerja >= $bebasSampai ? $setting->potongan_bpjstk : 0;
     }
@@ -224,6 +228,7 @@ class EmployeeKinerja extends Model
             ]
         ];
     }
+
     public function rincianGajiList($employeeId): array
     {
         $setting = SettingGaji::first();

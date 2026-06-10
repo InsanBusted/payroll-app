@@ -332,7 +332,7 @@
                     $totalPph       += $pph;
                     $totalBpjs      += $bpjsPotongan;
                     $totalBruto     += ($gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus);
-                    $totalPotongan  += ($bpjsPotongan + ($rincian['potongan']['absensi'] ?? 0) + $pph);
+                    $totalPotongan  += ($bpjsPotongan +  $pph);
 
                     $rowNum   = $i + 1;
                     $isLast   = ($rowNum === $kinerjaCount);
@@ -452,7 +452,7 @@
                 <td class="text-right">Rp {{ number_format($totalGrosir, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalAkses, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalBonus, 0, ',', '.') }}</td>
-                <td class="text-right potongan">Rp {{ number_format($totalAbsensi, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalAbsensi, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalPph, 0, ',', '.') }}</td>
                 <td class="text-right">-</td>
@@ -460,17 +460,23 @@
             </tr>
             <tr class="tfoot-total">
                 <td colspan="7" class="label-cell">Ringkasan Total</td>
-                <td colspan="6" class="text-right bruto-cell">
+                <td colspan="7" class="text-right bruto-cell">
                     <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #4b5563; margin-bottom: 2px;">Total Bruto</span>
-                    Rp {{ number_format($totalBruto, 0, ',', '.') }}
+                    @php
+                     $fixBruto = $totalBruto - $totalAbsensi;
+                    @endphp
+                    Rp {{ number_format($fixBruto, 0, ',', '.') }}
                 </td>
-                <td colspan="3" class="text-right potongan">
+                <td colspan="2" class="text-right potongan">
                     <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #b45309; margin-bottom: 2px;">Total Potongan</span>
                     Rp {{ number_format($totalPotongan, 0, ',', '.') }}
                 </td>
                 <td colspan="1" class="result-cell">
                     <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #16a34a; margin-bottom: 2px;">Total Gaji Bersih</span>
-                    Rp {{ number_format($totalGaji, 0, ',', '.') }}
+                    @php
+                        $gajiBersih = $fixBruto - $totalPotongan;
+                    @endphp
+                    Rp {{ number_format($gajiBersih, 0, ',', '.') }}
                 </td>
                 <td colspan="1" class="empty-cell"></td>
             </tr>

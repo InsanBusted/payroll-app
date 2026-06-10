@@ -9,11 +9,11 @@ class Pph21Seeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         DB::table('ter_rates')->truncate();
         DB::table('ptkp_statuses')->truncate();
         DB::table('ptkp_categories')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         /*
         |--------------------------------------------------------------------------

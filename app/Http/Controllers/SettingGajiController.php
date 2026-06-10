@@ -20,9 +20,11 @@ class SettingGajiController extends Controller
             'bebas_bpjstk_bulan'   => 3,
         ]);
 
+        $ptkpCategories = \App\Models\PtkpCategory::with(['statuses', 'terRates' => function($q) {
+            $q->orderBy('min_salary', 'asc');
+        }])->get();
 
-
-        return view('setting_gajis.index', compact('setting'));
+        return view('setting_gajis.index', compact('setting', 'ptkpCategories'));
     }
 
     public function update(Request $request, SettingGaji $settingGaji)
