@@ -270,7 +270,7 @@
                 <th class="text-center" style="width:5%">NIK</th>
                 <th class="text-left"   style="width:8%">Jabatan</th>
                 <th class="text-left"   style="width:5%">Area</th>
-                <th class="text-center" style="width:3%">Hadir</th>
+                <th class="text-center" style="width:3%">PTKP</th>
                 <th class="text-right"  style="width:8%">Gaji Pokok</th>
                 <th class="text-right"  style="width:8%">Tunj. Groom</th>
                 <th class="text-right"  style="width:7%">SRP</th>
@@ -345,7 +345,7 @@
                     <td class="text-center">{{ $row->employee->nik ?? '-' }}</td>
                     <td class="text-left">{{ $row->employee->jabatan->nama ?? '-' }}</td>
                     <td class="text-left">{{ $row->employee->area->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $row->total_hadir }}</td>
+                    <td class="text-center">{{ $row->employee->ptkpStatus->status ?? '-' }}</td>
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($gajiPokok, 0, ',', '.') }}</span>
                         <span class="calc-formula">{{ $row->total_hadir }} &times; {{ number_format($rateHarian, 0, ',', '.') }}</span>
@@ -422,7 +422,7 @@
                         <th class="text-center" style="width:5%">NIK</th>
                         <th class="text-left"   style="width:8%">Jabatan</th>
                         <th class="text-left"   style="width:5%">Area</th>
-                        <th class="text-center" style="width:3%">Hadir</th>
+                        <th class="text-center" style="width:3%">PTKP</th>
                         <th class="text-right"  style="width:8%">Gaji Pokok</th>
                         <th class="text-right"  style="width:8%">Tunj. Groom</th>
                         <th class="text-right"  style="width:7%">SRP</th>
