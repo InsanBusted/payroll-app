@@ -9,8 +9,8 @@
             </svg>
         </div>
         <div>
-            <p class="font-bold text-sm">Area Super Admin</p>
-            <p class="text-white/70 text-xs">Halaman ini hanya dapat diakses oleh Super Admin. Kelola seluruh akun pengguna sistem di sini.</p>
+            <p class="font-bold text-sm">Area Administrasi</p>
+            <p class="text-white/70 text-xs">Halaman ini hanya dapat diakses oleh Super Admin & Finance. Kelola seluruh akun pengguna sistem di sini.</p>
         </div>
         <span class="ml-auto bg-white/20 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Restricted</span>
     </div>

@@ -10,8 +10,10 @@ class EnsureSuperAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || $request->user()->role?->name !== 'superadmin') {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses halaman ini.');
+        $role = $request->user()?->role?->name;
+
+        if (!$request->user() || !in_array($role, ['superadmin', 'finance'])) {
+            abort(403, 'Akses ditolak. Hanya Super Admin atau Finance yang dapat mengakses halaman ini.');
         }
 
         return $next($request);
