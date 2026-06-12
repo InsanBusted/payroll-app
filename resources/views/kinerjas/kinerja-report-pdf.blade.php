@@ -304,15 +304,15 @@
                 @php
                     $gajiB      = $row->hitungGajiDiterimaList();
                     $pph        = $row->hitungListPph21($row->employee_id);
-                    $rateHarian = $row->employee->jabatan->rate_gaji_pokok ?? 0;
+                    $rateHarian = $row->rate_gaji_pokok ?? ($row->employee->jabatan->rate_gaji_pokok ?? 0);
                     $gajiPokok  = $row->total_hadir * $rateHarian;
                     $rincian    = $row->rincianGajiList($row->employee_id);
                     $bpjsPotongan = $rincian['potongan']['bpjstk'] ?? 0;
 
-                    $rateGroom  = $setting->rate_tunjangan_groom ?? 0;
-                    $rateSrp    = $setting->rate_srp ?? 0;
-                    $rateGrosir = $setting->rate_grosir ?? 0;
-                    $rateAkses  = $setting->rate_aksesoris ?? 0;
+                    $rateGroom  = $row->rate_tunjangan_groom ?? ($setting->rate_tunjangan_groom ?? 0);
+                    $rateSrp    = $row->rate_srp ?? ($setting->rate_srp ?? 0);
+                    $rateGrosir = $row->rate_grosir ?? ($setting->rate_grosir ?? 0);
+                    $rateAkses  = $row->rate_aksesoris ?? ($setting->rate_aksesoris ?? 0);
 
                     $nilaiGroom  = $row->tunjangan_groom * $rateGroom;
                     $isSales     = stripos($row->employee->jabatan->nama ?? '', 'sales') !== false
@@ -381,7 +381,7 @@
                     <td class="text-right">Rp {{ number_format($row->bonus, 0, ',', '.') }}</td>
                     <td class="text-right" style="color:#b45309;">
                         @php
-                            $rateAbsensi = $setting->potongan_absensi ?? 0;
+                            $rateAbsensi = $row->potongan_absensi ?? ($setting->potongan_absensi ?? 0);
                             $nilaiAbsensi = $row->absensi * $rateAbsensi;
                         @endphp
                         <span class="calc-result">Rp {{ number_format($nilaiAbsensi, 0, ',', '.') }}</span>
