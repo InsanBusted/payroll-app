@@ -131,14 +131,14 @@
             class="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 class="font-bold text-slate-800 text-center sm:text-left">Daftar Kinerja Bulanan</h2>
             <div class="flex flex-wrap items-center justify-center sm:justify-end gap-2">
-                <a href="{{ route('kinerjas.export', array_filter(['periode' => request('periode')])) }}"
+                <a href="{{ route('kinerjas.export', array_filter(['periode_dari' => request('periode_dari'), 'periode_sampai' => request('periode_sampai')])) }}"
                     class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 11v6m-3-3h6" />
                     </svg>
-                    Export PDF{{ request('periode') ? ' (' . request('periode') . ')' : '' }}
+                    Export PDF{{ (request('periode_dari') || request('periode_sampai')) ? ' (' . (request('periode_dari') ?? '…') . ' s/d ' . (request('periode_sampai') ?? '…') . ')' : '' }}
                 </a>
                 @if (auth()->user()->role->name === 'finance')
                     <button onclick="openModal('delete-periode-modal')"
@@ -180,37 +180,18 @@
                 </div>
             </div>
 
-            {{-- Filter Periode --}}
+            {{-- Filter Periode Range --}}
             <div class="w-full sm:w-auto flex-shrink-0">
-                <label
-                    class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Periode</label>
-                <select name="periode"
-                    class="w-full sm:w-auto border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[170px]">
-                    <option value="">— Semua Periode —</option>
-                    @foreach ($availablePeriodes as $p)
-                        @php
-                            [$y, $m] = explode('-', $p);
-                            $bulan = [
-                                '',
-                                'Januari',
-                                'Februari',
-                                'Maret',
-                                'April',
-                                'Mei',
-                                'Juni',
-                                'Juli',
-                                'Agustus',
-                                'September',
-                                'Oktober',
-                                'November',
-                                'Desember',
-                            ];
-                        @endphp
-                        <option value="{{ $p }}" {{ request('periode') == $p ? 'selected' : '' }}>
-                            {{ $bulan[(int) $m] }} {{ $y }}
-                        </option>
-                    @endforeach
-                </select>
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Periode</label>
+                <div class="flex items-center gap-2">
+                    <input type="month" name="periode_dari" value="{{ request('periode_dari') }}"
+                        title="Dari bulan"
+                        class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[150px]">
+                    <span class="text-slate-400 text-xs font-semibold flex-shrink-0">s/d</span>
+                    <input type="month" name="periode_sampai" value="{{ request('periode_sampai') }}"
+                        title="Sampai bulan"
+                        class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition min-w-[150px]">
+                </div>
             </div>
 
             {{-- Sort --}}
@@ -241,7 +222,7 @@
                     </svg>
                     Filter
                 </button>
-                @if (request('search') || request('periode') || request('sort'))
+                @if (request('search') || request('periode_dari') || request('periode_sampai') || request('sort'))
                     <a href="{{ route('kinerjas.index') }}"
                         class="w-full sm:w-auto justify-center inline-flex items-center gap-1.5 border border-slate-300 text-slate-600 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
@@ -255,32 +236,32 @@
         </form>
 
         {{-- Result info --}}
-        @if (request('search') || request('periode'))
+        @if (request('search') || request('periode_dari') || request('periode_sampai'))
             <div class="px-6 py-2 bg-indigo-50 border-b border-indigo-100 text-xs text-indigo-700 font-medium">
                 Menampilkan {{ $kinerjas->total() }} hasil
                 @if (request('search'))
                     untuk <strong>"{{ request('search') }}"</strong>
                 @endif
-                @if (request('periode'))
+                @if (request('periode_dari') || request('periode_sampai'))
                     @php
-                        [$y, $m] = explode('-', request('periode'));
-                        $bl = [
-                            '',
-                            'Januari',
-                            'Februari',
-                            'Maret',
-                            'April',
-                            'Mei',
-                            'Juni',
-                            'Juli',
-                            'Agustus',
-                            'September',
-                            'Oktober',
-                            'November',
-                            'Desember',
-                        ];
+                        $bl = ['','Januari','Februari','Maret','April','Mei','Juni',
+                               'Juli','Agustus','September','Oktober','November','Desember'];
+                        $fmtPeriode = function($val) use ($bl) {
+                            if (!$val) return null;
+                            [$y, $m] = explode('-', $val);
+                            return $bl[(int)$m] . ' ' . $y;
+                        };
+                        $pDari   = $fmtPeriode(request('periode_dari'));
+                        $pSampai = $fmtPeriode(request('periode_sampai'));
                     @endphp
-                    periode <strong>{{ $bl[(int) $m] }} {{ $y }}</strong>
+                    periode
+                    @if ($pDari && $pSampai)
+                        <strong>{{ $pDari }} s/d {{ $pSampai }}</strong>
+                    @elseif ($pDari)
+                        <strong>mulai {{ $pDari }}</strong>
+                    @elseif ($pSampai)
+                        <strong>sampai {{ $pSampai }}</strong>
+                    @endif
                 @endif
             </div>
         @endif
@@ -667,6 +648,7 @@
             </form>
         </div>
     </div>
+
 
     <script>
         function openModal(id) {

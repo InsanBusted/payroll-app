@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\Employee;
 use App\Models\Jabatan;
 use App\Models\PtkpStatus;
+use App\Models\Ptkp17Status;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +16,7 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Employee::with(['user', 'jabatan', 'area', 'ptkpStatus'])->latest();
+        $query = Employee::with(['user', 'jabatan', 'area', 'ptkpStatus', 'ptkp17Status'])->latest();
 
         if ($request->has('search') && $request->search != '') {
             $query->where('nama', 'like', '%' . $request->search . '%');
@@ -25,6 +26,7 @@ class EmployeeController extends Controller
         $jabatans     = Jabatan::orderBy('nama', 'asc')->get();
         $areas        = Area::orderBy('nama', 'asc')->get();
         $ptkpStatuses = PtkpStatus::orderBy('status', 'asc')->get();
+        $ptkp17Statuses = Ptkp17Status::orderBy('status', 'asc')->get();
         // cuman user yang belum punya employee yang ditampilkan untuk dropdown
         $users = User::whereDoesntHave('employee')->orderBy('name', 'asc')->get();
 
@@ -35,7 +37,7 @@ class EmployeeController extends Controller
         $linkedEmployees   = $employee->whereNotNull('user_id')->count();
         $unlinkedEmployees = $employee->whereNull('user_id')->count();
 
-        return view('employees.index', compact('employees', 'jabatans', 'areas', 'users', 'ptkpStatuses', 'totalEmployees', 'linkedEmployees', 'unlinkedEmployees'));
+        return view('employees.index', compact('employees', 'jabatans', 'areas', 'users', 'ptkpStatuses', 'ptkp17Statuses', 'totalEmployees', 'linkedEmployees', 'unlinkedEmployees'));
     }
 
     public function store(Request $request)
@@ -47,13 +49,14 @@ class EmployeeController extends Controller
             'jabatan_id'     => 'nullable|exists:jabatans,id',
             'area_id'        => 'nullable|exists:areas,id',
             'ptkp_status_id' => 'nullable|exists:ptkp_statuses,id',
+            'ptkp_17_status_id' => 'nullable|exists:ptkp_17_statuses,id',
             'no_rek_bank'    => 'nullable|string|max:50',
             'nama_bank'      => 'nullable|string|max:50',
             'user_id'        => 'nullable|exists:users,id|unique:employees,user_id',
             'signature_path' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ]);
 
-        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'no_rek_bank', 'nama_bank', 'user_id']);
+        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'ptkp_17_status_id', 'no_rek_bank', 'nama_bank', 'user_id']);
 
 
         if ($request->hasFile('signature_path')) {
@@ -76,13 +79,14 @@ class EmployeeController extends Controller
             'jabatan_id'     => 'nullable|exists:jabatans,id',
             'area_id'        => 'nullable|exists:areas,id',
             'ptkp_status_id' => 'nullable|exists:ptkp_statuses,id',
+            'ptkp_17_status_id' => 'nullable|exists:ptkp_17_statuses,id',
             'no_rek_bank'    => 'nullable|string|max:50',
             'nama_bank'      => 'nullable|string|max:50',
             'user_id'        => ['nullable', 'exists:users,id', Rule::unique('employees')->ignore($employee->id)],
             'signature_path' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ]);
 
-        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'no_rek_bank', 'nama_bank', 'user_id']);
+        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'ptkp_17_status_id', 'no_rek_bank', 'nama_bank', 'user_id']);
 
         if ($request->hasFile('signature_path')) {
             // Delete old signature if exists

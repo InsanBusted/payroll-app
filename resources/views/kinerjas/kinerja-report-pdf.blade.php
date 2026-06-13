@@ -247,46 +247,50 @@
 <div class="page">
     <div class="header">
         <div class="header-title">Rekap Gaji Karyawan</div>
-        @if ($periode)
-            @php
-                [$y, $m] = explode('-', $periode);
-                $bulan = ['','Januari','Februari','Maret','April','Mei','Juni',
-                          'Juli','Agustus','September','Oktober','November','Desember'];
-            @endphp
-            <div class="header-subtitle">Periode: {{ $bulan[(int)$m] }} {{ $y }}</div>
-        @else
-            @php $y = null; $m = null; $bulan = []; @endphp
-            <div class="header-subtitle">Semua Periode</div>
-        @endif
-        <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y') }} WIB &nbsp;|&nbsp; Total Data: {{ count($kinerjas) }} karyawan</div>
+        @php
+            $bulan = ['','Januari','Februari','Maret','April','Mei','Juni',
+                      'Juli','Agustus','September','Oktober','November','Desember'];
+            $labelPeriode = 'Semua Periode';
+            if ($periodeDari && $periodeSampai) {
+                [$yd, $md] = explode('-', $periodeDari);
+                [$ys, $ms] = explode('-', $periodeSampai);
+                $labelPeriode = $bulan[(int)$md] . ' ' . $yd . ' s/d ' . $bulan[(int)$ms] . ' ' . $ys;
+            } elseif ($periodeDari) {
+                [$yd, $md] = explode('-', $periodeDari);
+                $labelPeriode = 'Mulai ' . $bulan[(int)$md] . ' ' . $yd;
+            } elseif ($periodeSampai) {
+                [$ys, $ms] = explode('-', $periodeSampai);
+                $labelPeriode = 'Sampai ' . $bulan[(int)$ms] . ' ' . $ys;
+            }
+        @endphp
+        <div class="header-subtitle">Periode: {{ $labelPeriode }}</div>
+        <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y') }} WIB &nbsp;|&nbsp; Total Karyawan: {{ count($aggregated) }}</div>
     </div>
 
     <table>
         <thead>
             <tr>
                 <th class="text-center" style="width:2%">No</th>
-                <th class="text-left"   style="width:5%">Periode</th>
-                <th class="text-left"   style="width:10%">Nama Karyawan</th>
+                <th class="text-left"   style="width:12%">Nama Karyawan</th>
                 <th class="text-center" style="width:5%">NIK</th>
-                <th class="text-left"   style="width:8%">Jabatan</th>
-                <th class="text-left"   style="width:5%">Area</th>
+                <th class="text-left"   style="width:9%">Jabatan</th>
+                <th class="text-left"   style="width:6%">Area</th>
                 <th class="text-center" style="width:3%">PTKP</th>
                 <th class="text-right"  style="width:8%">Gaji Pokok</th>
-                <th class="text-right"  style="width:8%">Tunj. Groom</th>
-                <th class="text-right"  style="width:7%">SRP</th>
-                <th class="text-right"  style="width:7%">Grosir</th>
-                <th class="text-right"  style="width:7%">Aksesoris</th>
+                <th class="text-right"  style="width:7%">Tunj. Groom</th>
+                <th class="text-right"  style="width:6%">SRP</th>
+                <th class="text-right"  style="width:6%">Grosir</th>
+                <th class="text-right"  style="width:6%">Aksesoris</th>
                 <th class="text-right"  style="width:5%">Bonus</th>
-                <th class="text-center" style="width:3%">Absensi</th>
-                <th class="text-right"  style="width:6%">Pot. BPJS</th>
+                <th class="text-right"  style="width:5%">Absensi</th>
+                <th class="text-right"  style="width:5%">Pot. BPJS</th>
                 <th class="text-right"  style="width:5%">PPh 21</th>
-                <th class="text-right"  style="width:7%">Gaji Bersih</th>
-                <th class="text-center" style="width:7%">Status</th>
+                <th class="text-right"  style="width:7%">Gaji Bruto</th>
+                <th class="text-right"  style="width:8%">Gaji Bersih</th>
             </tr>
         </thead>
         <tbody>
             @php
-                $totalGaji       = 0;
                 $totalGajiPokok  = 0;
                 $totalGroom      = 0;
                 $totalSrp        = 0;
@@ -294,111 +298,72 @@
                 $totalAkses      = 0;
                 $totalBonus      = 0;
                 $totalAbsensi    = 0;
-                $totalPph        = 0;
                 $totalBpjs       = 0;
-                $totalBruto      = 0;
-                $totalPotongan   = 0;
-                $kinerjaCount    = count($kinerjas);
+                $totalPph        = 0;
+                $totalFixBruto   = 0;
+                $totalGajiB      = 0;
+                $rowCount        = count($aggregated);
             @endphp
-            @forelse ($kinerjas as $i => $row)
+            @forelse ($aggregated as $i => $agg)
                 @php
-                    $gajiB      = $row->hitungGajiDiterimaList();
-                    $pph        = $row->hitungListPph21($row->employee_id);
-                    $rateHarian = $row->rate_gaji_pokok ?? ($row->employee->jabatan->rate_gaji_pokok ?? 0);
-                    $gajiPokok  = $row->total_hadir * $rateHarian;
-                    $rincian    = $row->rincianGajiList($row->employee_id);
-                    $bpjsPotongan = $rincian['potongan']['bpjstk'] ?? 0;
-
-                    $rateGroom  = $row->rate_tunjangan_groom ?? ($setting->rate_tunjangan_groom ?? 0);
-                    $rateSrp    = $row->rate_srp ?? ($setting->rate_srp ?? 0);
-                    $rateGrosir = $row->rate_grosir ?? ($setting->rate_grosir ?? 0);
-                    $rateAkses  = $row->rate_aksesoris ?? ($setting->rate_aksesoris ?? 0);
-
-                    $nilaiGroom  = $row->tunjangan_groom * $rateGroom;
-                    $isSales     = stripos($row->employee->jabatan->nama ?? '', 'sales') !== false
-                                || stripos($row->employee->jabatan->nama ?? '', 'kepala toko') !== false;
-                    $nilaiSrp    = $isSales ? $row->srp * $rateSrp : 0;
-                    $nilaiGrosir = $isSales ? $row->grosir * $rateGrosir : 0;
-                    $nilaiAkses  = $isSales ? $row->aksesoris * $rateAkses : 0;
-
-                    $totalGaji      += $gajiB;
-                    $totalGajiPokok += $gajiPokok;
-                    $totalGroom     += $nilaiGroom;
-                    $totalSrp       += $nilaiSrp;
-                    $totalGrosir    += $nilaiGrosir;
-                    $totalAkses     += $nilaiAkses;
-                    $totalBonus     += $row->bonus;
-                    $totalAbsensi   += $rincian['potongan']['absensi'] ?? 0;
-                    $totalPph       += $pph;
-                    $totalBpjs      += $bpjsPotongan;
-                    $totalBruto     += ($gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus);
-                    $totalPotongan  += ($bpjsPotongan +  $pph);
-
+                    $emp      = $agg['employee'];
+                    $isSales  = $agg['isSales'];
                     $rowNum   = $i + 1;
-                    $isLast   = ($rowNum === $kinerjaCount);
+                    $isLast   = ($rowNum === $rowCount);
                     $isRowTen = ($rowNum % 10 === 0);
+
+                    $totalGajiPokok  += $agg['gajiPokok'];
+                    $totalGroom      += $agg['nilaiGroom'];
+                    $totalSrp        += $agg['nilaiSrp'];
+                    $totalGrosir     += $agg['nilaiGrosir'];
+                    $totalAkses      += $agg['nilaiAkses'];
+                    $totalBonus      += $agg['bonus'];
+                    $totalAbsensi    += $agg['nilaiAbsensi'];
+                    $totalBpjs       += $agg['bpjsPotongan'];
+                    $totalPph        += $agg['pph'];
+                    $totalFixBruto   += $agg['fixBruto'];
+                    $totalGajiB      += $agg['gajiB'];
                 @endphp
                 <tr>
                     <td class="text-center">{{ $rowNum }}</td>
-                    <td class="text-center">{{ $row->periode }}</td>
-                    <td class="text-left font-bold">{{ $row->employee->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $row->employee->nik ?? '-' }}</td>
-                    <td class="text-left">{{ $row->employee->jabatan->nama ?? '-' }}</td>
-                    <td class="text-left">{{ $row->employee->area->nama ?? '-' }}</td>
-                    <td class="text-center">{{ $row->employee->ptkpStatus->status ?? '-' }}</td>
+                    <td class="text-left font-bold">{{ $emp->nama ?? '-' }}</td>
+                    <td class="text-center">{{ $emp->nik ?? '-' }}</td>
+                    <td class="text-left">{{ $emp->jabatan->nama ?? '-' }}</td>
+                    <td class="text-left">{{ $emp->area->nama ?? '-' }}</td>
+                    <td class="text-center">{{ $emp->ptkpStatus->status ?? '-' }}</td>
                     <td class="text-right">
-                        <span class="calc-result">Rp {{ number_format($gajiPokok, 0, ',', '.') }}</span>
-                        <span class="calc-formula">{{ $row->total_hadir }} &times; {{ number_format($rateHarian, 0, ',', '.') }}</span>
+                        <span class="calc-result">Rp {{ number_format($agg['gajiPokok'], 0, ',', '.') }}</span>
                     </td>
                     <td class="text-right">
-                        <span class="calc-result">Rp {{ number_format($nilaiGroom, 0, ',', '.') }}</span>
-                        <span class="calc-formula">{{ $row->tunjangan_groom }} &times; {{ number_format($rateGroom, 0, ',', '.') }}</span>
+                        <span class="calc-result">Rp {{ number_format($agg['nilaiGroom'], 0, ',', '.') }}</span>
                     </td>
                     <td class="text-right">
                         @if ($isSales)
-                            <span class="calc-result">Rp {{ number_format($nilaiSrp, 0, ',', '.') }}</span>
-                            <span class="calc-formula">{{ $row->srp }} &times; {{ number_format($rateSrp, 0, ',', '.') }}</span>
+                            <span class="calc-result">Rp {{ number_format($agg['nilaiSrp'], 0, ',', '.') }}</span>
                         @else
                             <span class="na-text">Non Sales</span>
                         @endif
                     </td>
                     <td class="text-right">
                         @if ($isSales)
-                            <span class="calc-result">Rp {{ number_format($nilaiGrosir, 0, ',', '.') }}</span>
-                            <span class="calc-formula">{{ $row->grosir }} &times; {{ number_format($rateGrosir, 0, ',', '.') }}</span>
+                            <span class="calc-result">Rp {{ number_format($agg['nilaiGrosir'], 0, ',', '.') }}</span>
                         @else
                             <span class="na-text">Non Sales</span>
                         @endif
                     </td>
                     <td class="text-right">
                         @if ($isSales)
-                            <span class="calc-result">Rp {{ number_format($nilaiAkses, 0, ',', '.') }}</span>
-                            <span class="calc-formula">{{ $row->aksesoris }} &times; {{ number_format($rateAkses, 0, ',', '.') }}</span>
+                            <span class="calc-result">Rp {{ number_format($agg['nilaiAkses'], 0, ',', '.') }}</span>
                         @else
                             <span class="na-text">Non Sales</span>
                         @endif
                     </td>
-                    <td class="text-right">Rp {{ number_format($row->bonus, 0, ',', '.') }}</td>
-                    <td class="text-right" style="color:#b45309;">
-                        @php
-                            $rateAbsensi = $row->potongan_absensi ?? ($setting->potongan_absensi ?? 0);
-                            $nilaiAbsensi = $row->absensi * $rateAbsensi;
-                        @endphp
-                        <span class="calc-result">Rp {{ number_format($nilaiAbsensi, 0, ',', '.') }}</span>
-                        <span class="calc-formula">{{ $row->absensi }} hr &times; {{ number_format($rateAbsensi, 0, ',', '.') }}</span>
-                    </td>
-                    <td class="text-right" style="color:#b45309;">Rp {{ number_format($bpjsPotongan, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format($pph, 0, ',', '.') }}</td>
-                    <td class="text-right font-bold">Rp {{ number_format($gajiB, 0, ',', '.') }}</td>
-                    <td class="text-center">
-                        @if (!$row->status_gaji)
-                            <span class="badge-belum-transfer">Belum Transfer</span>
-                        @elseif (!$row->status_diterima)
-                            <span class="badge-belum-diterima">Belum Diterima</span>
-                        @else
-                            <span class="badge-diterima">Sudah Diterima</span>
-                        @endif
-                    </td>
+                    <td class="text-right">Rp {{ number_format($agg['bonus'], 0, ',', '.') }}</td>
+                    <td class="text-right" style="color:#b45309;">Rp {{ number_format($agg['nilaiAbsensi'], 0, ',', '.') }}</td>
+                    <td class="text-right" style="color:#b45309;">Rp {{ number_format($agg['bpjsPotongan'], 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($agg['pph'], 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($agg['fixBruto'], 0, ',', '.') }}</td>
+                    <td class="text-right font-bold">Rp {{ number_format($agg['gajiB'], 0, ',', '.') }}</td>
                 </tr>
 
                 @if ($isRowTen && !$isLast)
@@ -410,42 +375,42 @@
         <div class="page">
             <div class="header">
                 <div class="header-title">Rekap Gaji Karyawan</div>
-                <div class="header-subtitle">Periode: {{ $m ? $bulan[(int)$m] . ' ' . $y : 'Semua Periode' }}</div>
-                <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y') }} WIB &nbsp;|&nbsp; Total Data: {{ $kinerjaCount }} karyawan</div>
+                <div class="header-subtitle">Periode: {{ $labelPeriode }}</div>
+                <div class="header-meta">Dicetak pada: {{ now()->translatedFormat('d F Y') }} WIB &nbsp;|&nbsp; Total Karyawan: {{ $rowCount }}</div>
             </div>
             <table>
                 <thead>
                     <tr>
                         <th class="text-center" style="width:2%">No</th>
-                        <th class="text-left"   style="width:5%">Periode</th>
-                        <th class="text-left"   style="width:10%">Nama Karyawan</th>
+                        <th class="text-left"   style="width:12%">Nama Karyawan</th>
                         <th class="text-center" style="width:5%">NIK</th>
-                        <th class="text-left"   style="width:8%">Jabatan</th>
-                        <th class="text-left"   style="width:5%">Area</th>
+                        <th class="text-left"   style="width:9%">Jabatan</th>
+                        <th class="text-left"   style="width:6%">Area</th>
                         <th class="text-center" style="width:3%">PTKP</th>
                         <th class="text-right"  style="width:8%">Gaji Pokok</th>
-                        <th class="text-right"  style="width:8%">Tunj. Groom</th>
-                        <th class="text-right"  style="width:7%">SRP</th>
-                        <th class="text-right"  style="width:7%">Grosir</th>
-                        <th class="text-right"  style="width:7%">Aksesoris</th>
+                        <th class="text-right"  style="width:7%">Tunj. Groom</th>
+                        <th class="text-right"  style="width:6%">SRP</th>
+                        <th class="text-right"  style="width:6%">Grosir</th>
+                        <th class="text-right"  style="width:6%">Aksesoris</th>
                         <th class="text-right"  style="width:5%">Bonus</th>
-                        <th class="text-center" style="width:3%">Absensi</th>
-                        <th class="text-right"  style="width:6%">Pot. BPJS</th>
+                        <th class="text-right"  style="width:5%">Absensi</th>
+                        <th class="text-right"  style="width:5%">Pot. BPJS</th>
                         <th class="text-right"  style="width:5%">PPh 21</th>
-                        <th class="text-right"  style="width:7%">Gaji Bersih</th>
-                        <th class="text-center" style="width:7%">Status</th>
+                        <th class="text-right"  style="width:7%">Gaji Bruto</th>
+                        <th class="text-right"  style="width:8%">Gaji Bersih</th>
                     </tr>
                 </thead>
                 <tbody>
                 @endif
             @empty
-                <tr><td colspan="18" class="text-center" style="padding: 20px; color: #aaa;">Tidak ada data kinerja.</td></tr>
+                <tr><td colspan="17" class="text-center" style="padding: 20px; color: #aaa;">Tidak ada data kinerja.</td></tr>
             @endforelse
         </tbody>
-        @if (count($kinerjas) > 0)
+        @if (count($aggregated) > 0)
+        @php $totalPotongan = $totalBpjs + $totalPph; @endphp
         <tfoot>
             <tr class="tfoot-komponen">
-                <td colspan="7" class="label-cell">Total per Komponen</td>
+                <td colspan="6" class="label-cell">Total per Komponen</td>
                 <td class="text-right">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalGroom, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalSrp, 0, ',', '.') }}</td>
@@ -455,30 +420,24 @@
                 <td class="text-right">Rp {{ number_format($totalAbsensi, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalPph, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalFixBruto, 0, ',', '.') }}</td>
                 <td class="text-right">-</td>
-                <td class="text-center">-</td>
             </tr>
             <tr class="tfoot-total">
-                <td colspan="7" class="label-cell">Ringkasan Total</td>
+                <td colspan="6" class="label-cell">Ringkasan Total</td>
                 <td colspan="7" class="text-right bruto-cell">
                     <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #4b5563; margin-bottom: 2px;">Total Bruto</span>
-                    @php
-                     $fixBruto = $totalBruto - $totalAbsensi;
-                    @endphp
-                    Rp {{ number_format($fixBruto, 0, ',', '.') }}
+                    Rp {{ number_format($totalFixBruto, 0, ',', '.') }}
                 </td>
                 <td colspan="2" class="text-right potongan">
                     <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #b45309; margin-bottom: 2px;">Total Potongan</span>
                     Rp {{ number_format($totalPotongan, 0, ',', '.') }}
                 </td>
-                <td colspan="1" class="result-cell">
+                <td class="empty-cell"></td>
+                <td class="result-cell">
                     <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #16a34a; margin-bottom: 2px;">Total Gaji Bersih</span>
-                    @php
-                        $gajiBersih = $fixBruto - $totalPotongan;
-                    @endphp
-                    Rp {{ number_format($gajiBersih, 0, ',', '.') }}
+                    Rp {{ number_format($totalGajiB, 0, ',', '.') }}
                 </td>
-                <td colspan="1" class="empty-cell"></td>
             </tr>
         </tfoot>
         @endif

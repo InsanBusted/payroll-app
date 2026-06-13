@@ -178,9 +178,61 @@ class EmployeeKinerja extends Model
             return 0;
         }
 
-
-
         return $hasilAkhir * ($rate->rate / 100);
+    }
+
+    public function hitunglistPph21Desember($employeeId) {
+        $setting = SettingGaji::query()->first();
+        if (!$setting) {
+            return 0;
+        }
+
+        $employee = Employee::with('ptkp17Status')->find($employeeId);
+        if (!$employee || !$employee->ptkp17Status) {
+            return 0;
+        }
+
+        $penghasilanNeto = $this->hitungTotalPendapatan() - $this->hitungPotonganBpjstk();
+        $employeePtkpStatus = $employee->ptkp17Status->ptkp_setahun;
+
+        $totalPkp = $penghasilanNeto - $employeePtkpStatus;
+
+//         dd([
+//     'neto' => $penghasilanNeto,
+//     'ptkp' => $employeePtkpStatus,
+//     'pkp'  => $totalPkp,
+// ]);
+        
+        if ($totalPkp <= 0) {
+            return 0;
+        }
+
+        $rate = PkpRate::where('start', '<', $totalPkp)
+            ->where(function ($query) use ($totalPkp) {
+                $query->whereNull('end')
+                    ->orWhere('end', '>=', $totalPkp);
+            })
+            ->first();
+
+        if (!$rate) {
+            return 0;
+        }
+
+        $tarifProgresif = $totalPkp * $rate->percent;
+        $Pph21Ter = $this->hitungListPph21($employeeId);
+
+        $hasilAkhirPph21Desember = $tarifProgresif - $Pph21Ter;
+
+//         dd([
+//     'pendapatan' => $this->hitungTotalPendapatan(),
+//     'bpjstk' => $this->hitungPotonganBpjstk(),
+//     'neto' => $penghasilanNeto,
+//     'ptkp' => $employeePtkpStatus,
+//     'pkp' => $totalPkp,
+//     'pph_ter' => $this->hitungListPph21($employeeId),
+// ]);
+
+        return $hasilAkhirPph21Desember;
     }
 
     /**
@@ -199,7 +251,7 @@ class EmployeeKinerja extends Model
 
         return $this->hitungPotonganBpjstk() + $potonganPph21;
     }
-
+    
     /**
      * Hitung gaji bersih yang diterima.
      */
@@ -208,11 +260,20 @@ class EmployeeKinerja extends Model
         $employeeId = $this->employee->id;
 
         $gaji = $this->hitungTotalPendapatan()
-            - $this->hitungListPph21($employeeId);
+            - $this->hitunglistPph21($employeeId);
 
         return $gaji - $this->hitungTotalPotongan();
     }
+    public function hitungGajiDiterimaListPph21Des(): int
+    {
+        $employeeId = $this->employee->id;
 
+        $gaji = $this->hitungTotalPendapatan()
+            - $this->hitunglistPph21Desember($employeeId);
+
+        return $gaji - $this->hitungPotonganBpjstk();
+    }
+    
     public function hitungGajiDiterima(): int
     {
         return $this->hitungTotalPendapatan() - $this->hitungTotalPotongan();

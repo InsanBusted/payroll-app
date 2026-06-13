@@ -18,6 +18,7 @@ class Employee extends Model
         'signature_path',
         'join_date',
         'ptkp_status_id',
+        'ptkp_17_status_id',
     ];
 
     protected static function booted()
@@ -52,5 +53,10 @@ class Employee extends Model
     public function ptkpStatus()
     {
         return $this->belongsTo(PtkpStatus::class);
+    }
+
+    public function ptkp17Status()
+    {
+        return $this->belongsTo(Ptkp17Status::class, 'ptkp_17_status_id');
     }
 }

@@ -15,9 +15,10 @@ class EmployeeKinerjaController extends Controller
 {
     public function index(Request $request)
     {
-        $search  = $request->input('search');
-        $periode = $request->input('periode');
-        $sort    = $request->input('sort', 'periode_desc');
+        $search        = $request->input('search');
+        $periodeDari   = $request->input('periode_dari');
+        $periodeSampai = $request->input('periode_sampai');
+        $sort          = $request->input('sort', 'periode_desc');
 
         $query = EmployeeKinerja::with('employee')
             ->when($search, function ($q) use ($search) {
@@ -27,9 +28,13 @@ class EmployeeKinerjaController extends Controller
                 });
             });
 
-        // Filter by periode (format YYYY-MM)
-        if ($periode) {
-            $query->where('periode', $periode);
+        // Filter by periode range (format YYYY-MM)
+        if ($periodeDari && $periodeSampai) {
+            $query->whereBetween('periode', [$periodeDari, $periodeSampai]);
+        } elseif ($periodeDari) {
+            $query->where('periode', '>=', $periodeDari);
+        } elseif ($periodeSampai) {
+            $query->where('periode', '<=', $periodeSampai);
         }
 
         // Sort
@@ -264,23 +269,110 @@ class EmployeeKinerjaController extends Controller
 
     public function export(Request $request)
     {
-        $periode = $request->input('periode');
+        $periodeDari   = $request->input('periode_dari');
+        $periodeSampai = $request->input('periode_sampai');
 
-        $query = EmployeeKinerja::with(['employee.jabatan', 'employee.area'])
-            ->when($periode, fn($q) => $q->where('periode', $periode))
+        $isHanyaDesember = false;
+        if ($periodeDari && $periodeSampai && $periodeDari === $periodeSampai && str_ends_with($periodeDari, '-12')) {
+            $isHanyaDesember = true;
+        }
+
+        
+
+        $query = EmployeeKinerja::with(['employee.jabatan', 'employee.area', 'employee.ptkpStatus'])
             ->join('employees', 'employee_kinerjas.employee_id', '=', 'employees.id')
-            ->orderBy('periode', 'desc')
             ->orderBy('employees.nama', 'asc')
             ->select('employee_kinerjas.*');
 
-        $kinerjas = $query->get();
-        $setting  = \App\Models\SettingGaji::first();
+        if ($periodeDari && $periodeSampai) {
+            $query->whereBetween('periode', [$periodeDari, $periodeSampai]);
+        } elseif ($periodeDari) {
+            $query->where('periode', '>=', $periodeDari);
+        } elseif ($periodeSampai) {
+            $query->where('periode', '<=', $periodeSampai);
+        }
 
-        $filename = $periode
-            ? 'laporan-kinerja-' . $periode . '.pdf'
-            : 'laporan-kinerja-semua.pdf';
+        $rawKinerjas = $query->get();
+        $setting     = \App\Models\SettingGaji::first();
 
-        $pdf = Pdf::loadView('kinerjas.kinerja-report-pdf', compact('kinerjas', 'periode', 'setting'))
+        // Aggregate per employee: jumlahkan semua komponen gaji lintas periode
+        $aggregatedMap = [];
+        foreach ($rawKinerjas as $row) {
+            $employeeId  = $row->employee_id;
+            $rateHarian  = $row->rate_gaji_pokok ?? ($row->employee->jabatan->rate_gaji_pokok ?? 0);
+            $gajiPokok   = $row->total_hadir * $rateHarian;
+
+            $rateGroom   = $row->rate_tunjangan_groom ?? ($setting->rate_tunjangan_groom ?? 0);
+            $rateSrp     = $row->rate_srp ?? ($setting->rate_srp ?? 0);
+            $rateGrosir  = $row->rate_grosir ?? ($setting->rate_grosir ?? 0);
+            $rateAkses   = $row->rate_aksesoris ?? ($setting->rate_aksesoris ?? 0);
+
+            $jabatanNama = $row->employee->jabatan->nama ?? '';
+            $isSales     = stripos($jabatanNama, 'sales') !== false
+                        || stripos($jabatanNama, 'kepala toko') !== false;
+
+            $nilaiGroom  = $row->tunjangan_groom * $rateGroom;
+            $nilaiSrp    = $isSales ? $row->srp * $rateSrp : 0;
+            $nilaiGrosir = $isSales ? $row->grosir * $rateGrosir : 0;
+            $nilaiAkses  = $isSales ? $row->aksesoris * $rateAkses : 0;
+
+            $rincian      = $row->rincianGajiList($employeeId);
+            $bpjsPotongan = $rincian['potongan']['bpjstk'] ?? 0;
+            $nilaiAbsensi = $rincian['potongan']['absensi'] ?? 0;
+
+                $pph          = $row->hitunglistPph21($employeeId);
+                $gajiB        = $row->hitungGajiDiterimaList();
+
+            $bruto    = $gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus;
+            $fixBruto = $bruto - $nilaiAbsensi;
+
+            if (!isset($aggregatedMap[$employeeId])) {
+                $aggregatedMap[$employeeId] = [
+                    'employee'     => $row->employee,
+                    'isSales'      => $isSales,
+                    'gajiPokok'    => 0,
+                    'nilaiGroom'   => 0,
+                    'nilaiSrp'     => 0,
+                    'nilaiGrosir'  => 0,
+                    'nilaiAkses'   => 0,
+                    'bonus'        => 0,
+                    'nilaiAbsensi' => 0,
+                    'bpjsPotongan' => 0,
+                    'pph'          => 0,
+                    'fixBruto'     => 0,
+                    'gajiB'        => 0,
+                ];
+            }
+
+            $aggregatedMap[$employeeId]['gajiPokok']    += $gajiPokok;
+            $aggregatedMap[$employeeId]['nilaiGroom']   += $nilaiGroom;
+            $aggregatedMap[$employeeId]['nilaiSrp']     += $nilaiSrp;
+            $aggregatedMap[$employeeId]['nilaiGrosir']  += $nilaiGrosir;
+            $aggregatedMap[$employeeId]['nilaiAkses']   += $nilaiAkses;
+            $aggregatedMap[$employeeId]['bonus']        += $row->bonus;
+            $aggregatedMap[$employeeId]['nilaiAbsensi'] += $nilaiAbsensi;
+            $aggregatedMap[$employeeId]['bpjsPotongan'] += $bpjsPotongan;
+            $aggregatedMap[$employeeId]['pph']          += $pph;
+
+// dd([
+//     'pph_dari_function' => $pph,
+//     'pph_di_aggregatedMap' => $aggregatedMap[$employeeId]['pph'],
+// ]);
+            $aggregatedMap[$employeeId]['fixBruto']     += $fixBruto;
+            $aggregatedMap[$employeeId]['gajiB']        += $gajiB;
+        }
+
+        $aggregated = array_values($aggregatedMap);
+
+        $filename = 'laporan-kinerja';
+        if ($periodeDari || $periodeSampai) {
+            $filename .= '-' . ($periodeDari ?? 'awal') . '-sd-' . ($periodeSampai ?? 'akhir');
+        } else {
+            $filename .= '-semua';
+        }
+        $filename .= '.pdf';
+
+        $pdf = Pdf::loadView('kinerjas.kinerja-report-pdf', compact('aggregated', 'periodeDari', 'periodeSampai', 'setting'))
             ->setPaper('A4', 'landscape');
 
         return $pdf->download($filename);
