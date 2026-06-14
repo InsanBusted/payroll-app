@@ -409,7 +409,7 @@ class EmployeeKinerja extends Model
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),
                 'absensi' => $this->absensi * $potonganAbsensiRate,
-                'pph21'   => $this->hitungListPph21($employeeId),
+                'pph21'   => $this->pph21,
             ],
             'total' => [
                 'total_potongan' => $totalPotongan,
