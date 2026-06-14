@@ -160,6 +160,11 @@ class EmployeeKinerja extends Model
     // untuk list di table
     public function hitungListPph21($employeeId): int
     {
+
+         if (!empty($this->pph21) && $this->pph21 > 0) {
+        return (int) $this->pph21;
+    }
+
         $setting = SettingGaji::query()->first();
         if (!$setting) {
             return 0;
@@ -409,7 +414,7 @@ class EmployeeKinerja extends Model
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),
                 'absensi' => $this->absensi * $potonganAbsensiRate,
-                'pph21'   => $this->pph21,
+                'pph21'   => $this->hitungListPph21($employeeId),
             ],
             'total' => [
                 'total_potongan' => $totalPotongan,
