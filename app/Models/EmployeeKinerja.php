@@ -115,14 +115,21 @@ class EmployeeKinerja extends Model
         $valueAksesoris     = $isSales ? $this->aksesoris * $rateAksesoris : 0;
         $potonganAbsensi    = $this->absensi * $potonganAbsensiRate;
 
-        $gajiTotal = ($gajiPokok
+        $gajiTotal = $gajiPokok
             + $tunjanganKerapihan
             + $valueSrp
             + $valueGrosir
             + $valueAksesoris
-            + $this->bonus) - $potonganAbsensi;
+            + $this->bonus;
 
-        return $gajiTotal;
+        $total = $gajiTotal - $potonganAbsensi;
+
+            // dd([
+            //     'gaji total: ' => $gajiTotal,
+            //     'potongan absensi: ' => $potonganAbsensi,
+            //     'total bruto: ' => $total
+            // ]);
+        return $total;
     }
 
     // untuk hitung total pph21
@@ -162,8 +169,7 @@ class EmployeeKinerja extends Model
         if (!$employee || !$employee->ptkpStatus) {
             return 0;
         }
-
-
+    
         $hasilAkhir = $this->hitungTotalPendapatan();
         $rate = TerRate::query()
             ->where('category_id', $employee->ptkpStatus->category_id)
@@ -224,13 +230,13 @@ class EmployeeKinerja extends Model
         $hasilAkhirPph21Desember = $tarifProgresif - $Pph21Ter;
 
 //         dd([
-//     'pendapatan' => $this->hitungTotalPendapatan(),
-//     'bpjstk' => $this->hitungPotonganBpjstk(),
-//     'neto' => $penghasilanNeto,
-//     'ptkp' => $employeePtkpStatus,
-//     'pkp' => $totalPkp,
-//     'pph_ter' => $this->hitungListPph21($employeeId),
-// ]);
+    //     'pendapatan' => $this->hitungTotalPendapatan(),
+    //     'bpjstk' => $this->hitungPotonganBpjstk(),
+    //     'neto' => $penghasilanNeto,
+    //     'ptkp' => $employeePtkpStatus,
+    //     'pkp' => $totalPkp,
+    //     'pph_ter' => $this->hitungListPph21($employeeId),
+    // ]);
 
         return $hasilAkhirPph21Desember;
     }
@@ -251,7 +257,7 @@ class EmployeeKinerja extends Model
 
         return $this->hitungPotonganBpjstk() + $potonganPph21;
     }
-    
+
     /**
      * Hitung gaji bersih yang diterima.
      */
@@ -259,10 +265,16 @@ class EmployeeKinerja extends Model
     {
         $employeeId = $this->employee->id;
 
-        $gaji = $this->hitungTotalPendapatan()
-            - $this->hitunglistPph21($employeeId);
+        $gaji = $this->hitungTotalPendapatan() - ($this->hitungPotonganBpjstk() + $this->hitunglistPph21($employeeId));
+        // dd([
+        //     'gaji : ' => $gaji,
+        //     'total pendapatan : ' => $this->hitungTotalPendapatan(),
+        //     'pph21 : ' => $this->hitungListPph21($employeeId),
+        //     'total potongan : ' => $this->hitungTotalPotongan(),
+        //     'gaji bersih : ' => $gaji
+        // ]);
 
-        return $gaji - $this->hitungTotalPotongan();
+        return $gaji;
     }
     public function hitungGajiDiterimaListPph21Des(): int
     {
@@ -383,6 +395,8 @@ class EmployeeKinerja extends Model
         $isSales = stripos($employee->jabatan->nama, 'sales') !== false
                 || stripos($employee->jabatan->nama, 'kepala toko') !== false;
 
+        $totalPotongan = $this->hitungPotonganBpjstk($setting) + $this->hitungListPph21($employeeId);
+        
         return [
             'pendapatan' => [
                 'gaji_pokok'          => $this->total_hadir * $rateGajiPokok,
@@ -392,11 +406,13 @@ class EmployeeKinerja extends Model
                 'aksesoris'           => $isSales ? $this->aksesoris * $rateAksesoris : 0,
                 'bonus'               => $this->bonus,
             ],
-
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),
                 'absensi' => $this->absensi * $potonganAbsensiRate,
                 'pph21'   => $this->hitungListPph21($employeeId),
+            ],
+            'total' => [
+                'total_potongan' => $totalPotongan,
             ]
         ];
     }

@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('rekap_viewer')->group(function () {
         Route::get('/rekap-periodes', [RekapPeriodeController::class, 'index'])->name('rekap_periodes.index');
         Route::get('/rekap-periodes/{rekapPeriode}', [RekapPeriodeController::class, 'show'])->name('rekap_periodes.show');
+        Route::patch('/rekap-periodes/{rekapPeriode}/submit', [RekapPeriodeController::class, 'submit'])->name('rekap_periodes.submit');
     });
     Route::middleware('direktur')->group(function () {
         Route::patch('/rekap-periodes/{rekapPeriode}/approve', [RekapPeriodeController::class, 'approve'])->name('rekap_periodes.approve');

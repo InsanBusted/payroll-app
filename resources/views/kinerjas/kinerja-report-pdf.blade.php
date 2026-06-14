@@ -333,13 +333,16 @@
                     <td class="text-center">{{ $emp->ptkpStatus->status ?? '-' }}</td>
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($agg['gajiPokok'], 0, ',', '.') }}</span>
+                        <span class="calc-formula">{{ $agg['totalHadir'] }} hr &times; {{ number_format($agg['rateHarian'], 0, ',', '.') }}</span>
                     </td>
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($agg['nilaiGroom'], 0, ',', '.') }}</span>
+                        <span class="calc-formula">{{ $agg['rawGroom'] }} &times; {{ number_format($agg['rateGroom'], 0, ',', '.') }}</span>
                     </td>
                     <td class="text-right">
                         @if ($isSales)
                             <span class="calc-result">Rp {{ number_format($agg['nilaiSrp'], 0, ',', '.') }}</span>
+                            <span class="calc-formula">{{ $agg['rawSrp'] }} &times; {{ number_format($agg['rateSrp'], 0, ',', '.') }}</span>
                         @else
                             <span class="na-text">Non Sales</span>
                         @endif
@@ -347,6 +350,7 @@
                     <td class="text-right">
                         @if ($isSales)
                             <span class="calc-result">Rp {{ number_format($agg['nilaiGrosir'], 0, ',', '.') }}</span>
+                            <span class="calc-formula">{{ $agg['rawGrosir'] }} &times; {{ number_format($agg['rateGrosir'], 0, ',', '.') }}</span>
                         @else
                             <span class="na-text">Non Sales</span>
                         @endif
@@ -354,12 +358,16 @@
                     <td class="text-right">
                         @if ($isSales)
                             <span class="calc-result">Rp {{ number_format($agg['nilaiAkses'], 0, ',', '.') }}</span>
+                            <span class="calc-formula">{{ $agg['rawAkses'] }} &times; {{ number_format($agg['rateAkses'], 0, ',', '.') }}</span>
                         @else
                             <span class="na-text">Non Sales</span>
                         @endif
                     </td>
                     <td class="text-right">Rp {{ number_format($agg['bonus'], 0, ',', '.') }}</td>
-                    <td class="text-right" style="color:#b45309;">Rp {{ number_format($agg['nilaiAbsensi'], 0, ',', '.') }}</td>
+                    <td class="text-right" style="color:#b45309;">
+                        <span class="calc-result">Rp {{ number_format($agg['nilaiAbsensi'], 0, ',', '.') }}</span>
+                        <span class="calc-formula">{{ $agg['rawAbsensi'] }} hr</span>
+                    </td>
                     <td class="text-right" style="color:#b45309;">Rp {{ number_format($agg['bpjsPotongan'], 0, ',', '.') }}</td>
                     <td class="text-right">Rp {{ number_format($agg['pph'], 0, ',', '.') }}</td>
                     <td class="text-right">Rp {{ number_format($agg['fixBruto'], 0, ',', '.') }}</td>

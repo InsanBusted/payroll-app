@@ -12,6 +12,7 @@ class RekapPeriode extends Model
 
     protected $fillable = [
         'periode',
+        'is_draft',
         'is_approved',
         'approved_by',
         'approved_at',
@@ -24,6 +25,7 @@ class RekapPeriode extends Model
     protected function casts(): array
     {
         return [
+            'is_draft'    => 'boolean',
             'is_approved' => 'boolean',
             'is_rejected' => 'boolean',
             'approved_at' => 'datetime',

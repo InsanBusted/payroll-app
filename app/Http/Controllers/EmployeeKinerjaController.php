@@ -20,6 +20,8 @@ class EmployeeKinerjaController extends Controller
         $periodeSampai = $request->input('periode_sampai');
         $sort          = $request->input('sort', 'periode_desc');
 
+        $isDirektur = \Illuminate\Support\Facades\Auth::user()->hasRole('direktur');
+
         $query = EmployeeKinerja::with('employee')
             ->when($search, function ($q) use ($search) {
                 $q->whereHas('employee', function ($eq) use ($search) {
@@ -27,6 +29,15 @@ class EmployeeKinerjaController extends Controller
                         ->orWhere('nik', 'like', '%' . $search . '%');
                 });
             });
+
+        // Filter by role: Direktur only sees performance of approved periods
+        if ($isDirektur) {
+            $query->whereIn('periode', function ($q) {
+                $q->select('periode')
+                    ->from('rekap_periodes')
+                    ->where('is_approved', true);
+            });
+        }
 
         // Filter by periode range (format YYYY-MM)
         if ($periodeDari && $periodeSampai) {
@@ -53,10 +64,15 @@ class EmployeeKinerjaController extends Controller
         $employees = Employee::with('jabatan')->orderBy('nama', 'asc')->get();
 
         // Daftar periode yang ada di DB untuk dropdown filter
-        $availablePeriodes = EmployeeKinerja::select('periode')
-            ->distinct()
-            ->orderBy('periode', 'desc')
-            ->pluck('periode');
+        $periodesQuery = EmployeeKinerja::select('periode')->distinct();
+        if ($isDirektur) {
+            $periodesQuery->whereIn('periode', function ($q) {
+                $q->select('periode')
+                    ->from('rekap_periodes')
+                    ->where('is_approved', true);
+            });
+        }
+        $availablePeriodes = $periodesQuery->orderBy('periode', 'desc')->pluck('periode');
 
         // Daftar periode yang sudah di-approve direktur
         $approvedPeriodes = RekapPeriode::where('is_approved', true)
@@ -68,6 +84,16 @@ class EmployeeKinerjaController extends Controller
 
     public function show(EmployeeKinerja $kinerja)
     {
+        $isDirektur = \Illuminate\Support\Facades\Auth::user()->hasRole('direktur');
+        if ($isDirektur) {
+            $approved = RekapPeriode::where('periode', $kinerja->periode)
+                ->where('is_approved', true)
+                ->exists();
+            if (!$approved) {
+                abort(403, 'Data kinerja periode ini belum disetujui.');
+            }
+        }
+
         $kinerja->load('employee.jabatan', 'employee.area');
         $rincian = $kinerja->rincianGajiList($kinerja->employee_id);
 
@@ -81,7 +107,7 @@ class EmployeeKinerjaController extends Controller
             'periode'         => [
                 'required',
                 'string',
-                'max:7', // YYYY-MM
+                'max:7', 
                 Rule::unique('employee_kinerjas')->where(function ($query) use ($request) {
                     return $query->where('employee_id', $request->employee_id)
                         ->where('periode', $request->periode);
@@ -197,7 +223,7 @@ class EmployeeKinerjaController extends Controller
         // Auto-create rekap periode jika belum ada (jangan reset is_approved jika sudah ada)
         RekapPeriode::firstOrCreate(
             ['periode' => $request->periode],
-            ['is_approved' => false]
+            ['is_draft' => true, 'is_approved' => false]
         );
 
         $msg = "Import selesai: {$import->importedCount} data baru, {$import->updatedCount} diperbarui, {$import->skippedCount} dilewati.";
@@ -279,10 +305,21 @@ class EmployeeKinerjaController extends Controller
 
         
 
+        $isDirektur = \Illuminate\Support\Facades\Auth::user()->hasRole('direktur');
+
         $query = EmployeeKinerja::with(['employee.jabatan', 'employee.area', 'employee.ptkpStatus'])
             ->join('employees', 'employee_kinerjas.employee_id', '=', 'employees.id')
             ->orderBy('employees.nama', 'asc')
             ->select('employee_kinerjas.*');
+
+        // Filter by role: Direktur only exports performance of approved periods
+        if ($isDirektur) {
+            $query->whereIn('periode', function ($q) {
+                $q->select('periode')
+                    ->from('rekap_periodes')
+                    ->where('is_approved', true);
+            });
+        }
 
         if ($periodeDari && $periodeSampai) {
             $query->whereBetween('periode', [$periodeDari, $periodeSampai]);
@@ -320,29 +357,58 @@ class EmployeeKinerjaController extends Controller
             $bpjsPotongan = $rincian['potongan']['bpjstk'] ?? 0;
             $nilaiAbsensi = $rincian['potongan']['absensi'] ?? 0;
 
-                $pph          = $row->hitunglistPph21($employeeId);
-                $gajiB        = $row->hitungGajiDiterimaList();
+            // Per-row December detection
+            // $isDesember = str_ends_with($row->periode ?? '', '-12');
+            // if ($isDesember) {
+            //     $pph   = $row->hitunglistPph21Desember($employeeId);
+            //     $gajiB = $row->hitungGajiDiterimaListPph21Des();
+            // } else {
+            //     $pph   = $row->hitungListPph21($employeeId);
+            //     $gajiB = $row->hitungGajiDiterimaList();
+            // }
+
+                $pph   = $row->hitungListPph21($employeeId);
+                $gajiB = $row->hitungGajiDiterimaList();
 
             $bruto    = $gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus;
             $fixBruto = $bruto - $nilaiAbsensi;
 
+            // Raw quantities for formula display
+            $rawAbsensi  = $rincian['potongan']['absensi_qty'] ?? $row->absensi;
+
+
+
             if (!isset($aggregatedMap[$employeeId])) {
                 $aggregatedMap[$employeeId] = [
-                    'employee'     => $row->employee,
-                    'isSales'      => $isSales,
-                    'gajiPokok'    => 0,
-                    'nilaiGroom'   => 0,
-                    'nilaiSrp'     => 0,
-                    'nilaiGrosir'  => 0,
-                    'nilaiAkses'   => 0,
-                    'bonus'        => 0,
-                    'nilaiAbsensi' => 0,
-                    'bpjsPotongan' => 0,
-                    'pph'          => 0,
-                    'fixBruto'     => 0,
-                    'gajiB'        => 0,
+                    'employee'      => $row->employee,
+                    'isSales'       => $isSales,
+                    'gajiPokok'     => 0,
+                    'nilaiGroom'    => 0,
+                    'nilaiSrp'      => 0,
+                    'nilaiGrosir'   => 0,
+                    'nilaiAkses'    => 0,
+                    'bonus'         => 0,
+                    'nilaiAbsensi'  => 0,
+                    'bpjsPotongan'  => 0,
+                    'pph'           => 0,
+                    'fixBruto'      => 0,
+                    'gajiB'         => 0,
+                    // Raw quantities (summed) for formula display
+                    'totalHadir'    => 0,
+                    'rawGroom'      => 0,
+                    'rawSrp'        => 0,
+                    'rawGrosir'     => 0,
+                    'rawAkses'      => 0,
+                    'rawAbsensi'    => 0,
+                    // Rates (last row wins — rates rarely change mid-period)
+                    'rateHarian'    => $rateHarian,
+                    'rateGroom'     => $rateGroom,
+                    'rateSrp'       => $rateSrp,
+                    'rateGrosir'    => $rateGrosir,
+                    'rateAkses'     => $rateAkses,
                 ];
             }
+
 
             $aggregatedMap[$employeeId]['gajiPokok']    += $gajiPokok;
             $aggregatedMap[$employeeId]['nilaiGroom']   += $nilaiGroom;
@@ -353,23 +419,33 @@ class EmployeeKinerjaController extends Controller
             $aggregatedMap[$employeeId]['nilaiAbsensi'] += $nilaiAbsensi;
             $aggregatedMap[$employeeId]['bpjsPotongan'] += $bpjsPotongan;
             $aggregatedMap[$employeeId]['pph']          += $pph;
-
-// dd([
-//     'pph_dari_function' => $pph,
-//     'pph_di_aggregatedMap' => $aggregatedMap[$employeeId]['pph'],
-// ]);
             $aggregatedMap[$employeeId]['fixBruto']     += $fixBruto;
             $aggregatedMap[$employeeId]['gajiB']        += $gajiB;
+            // Sum raw quantities
+            $aggregatedMap[$employeeId]['totalHadir']   += $row->total_hadir;
+            $aggregatedMap[$employeeId]['rawGroom']     += $row->tunjangan_groom;
+            $aggregatedMap[$employeeId]['rawSrp']       += $row->srp;
+            $aggregatedMap[$employeeId]['rawGrosir']    += $row->grosir;
+            $aggregatedMap[$employeeId]['rawAkses']     += $row->aksesoris;
+            $aggregatedMap[$employeeId]['rawAbsensi']   += $row->absensi;
+            // Update rates to last row
+            $aggregatedMap[$employeeId]['rateHarian']    = $rateHarian;
+            $aggregatedMap[$employeeId]['rateGroom']     = $rateGroom;
+            $aggregatedMap[$employeeId]['rateSrp']       = $rateSrp;
+            $aggregatedMap[$employeeId]['rateGrosir']    = $rateGrosir;
+            $aggregatedMap[$employeeId]['rateAkses']     = $rateAkses;
         }
 
         $aggregated = array_values($aggregatedMap);
 
         $filename = 'laporan-kinerja';
+
         if ($periodeDari || $periodeSampai) {
             $filename .= '-' . ($periodeDari ?? 'awal') . '-sd-' . ($periodeSampai ?? 'akhir');
         } else {
             $filename .= '-semua';
         }
+
         $filename .= '.pdf';
 
         $pdf = Pdf::loadView('kinerjas.kinerja-report-pdf', compact('aggregated', 'periodeDari', 'periodeSampai', 'setting'))

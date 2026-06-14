@@ -400,6 +400,7 @@
                                 <input type="number" id="ed_absensi" name="absensi" min="0"
                                     class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition tabular-nums">
                             </div>
+                            
                             <div>
                                 <label for="ed_pph21" class="block text-xs font-medium text-slate-600 mb-1.5">PPh 21
                                     Nominal (Rp)</label>
