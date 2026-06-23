@@ -125,8 +125,7 @@
                     <div class="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-200">
                         <p class="text-xs text-slate-500 leading-relaxed font-medium">
                             <span class="text-indigo-500 font-bold">Catatan:</span><br>
-                            Nilai PPh21 tidak disetting di sini, melainkan diinput langsung pada kinerja per karyawan
-                            karena nilainya berbeda tergantung PTKP.
+                            Nilai PPh21 dihitung otomatis oleh sistem menggunakan Tarif TER sesuai dengan PMK No 168 tahun 2023
                         </p>
                     </div>
                 </div>
