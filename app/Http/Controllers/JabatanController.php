@@ -21,9 +21,10 @@ class JabatanController extends Controller
             'nama'     => 'required|string|max:100|unique:jabatans,nama',
             'deskripsi'=> 'nullable|string|max:255',
             'rate_gaji_pokok'=> 'nullable|int',
+            'rate_lembur'    => 'nullable|int',
         ]);
 
-        Jabatan::create($request->only(['nama', 'deskripsi', 'rate_gaji_pokok']));
+        Jabatan::create($request->only(['nama', 'deskripsi', 'rate_gaji_pokok', 'rate_lembur']));
 
         return redirect()->route('jabatans.index')
             ->with('success', 'Jabatan "' . $request->nama . '" berhasil ditambahkan.');
@@ -36,9 +37,10 @@ class JabatanController extends Controller
             'nama'     => ['required', 'string', 'max:100', Rule::unique('jabatans')->ignore($jabatan->id)],
             'deskripsi'=> 'nullable|string|max:255',
             'rate_gaji_pokok'=> 'nullable|int',
+            'rate_lembur'    => 'nullable|int',
         ]);
 
-        $jabatan->update($request->only(['nama', 'deskripsi', 'rate_gaji_pokok']));
+        $jabatan->update($request->only(['nama', 'deskripsi', 'rate_gaji_pokok', 'rate_lembur']));
 
         return redirect()->route('jabatans.index')
             ->with('success', 'Jabatan "' . $jabatan->nama . '" berhasil diperbarui.');

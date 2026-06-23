@@ -119,6 +119,24 @@
             font-size: 8px;
             font-weight: bold;
         }
+        .badge-tetap {
+            display: inline-block;
+            background: #ccfbf1;
+            color: #065f46;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+        .badge-tidak-tetap {
+            display: inline-block;
+            background: #ffedd5;
+            color: #9a3412;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: bold;
+        }
 
         /* ── Summary Row ── */
         .summary-row td {
@@ -271,38 +289,41 @@
         <thead>
             <tr>
                 <th class="text-center" style="width:2%">No</th>
-                <th class="text-left"   style="width:12%">Nama Karyawan</th>
+                <th class="text-left"   style="width:11%">Nama Karyawan</th>
                 <th class="text-center" style="width:5%">NIK</th>
-                <th class="text-left"   style="width:9%">Jabatan</th>
-                <th class="text-left"   style="width:6%">Area</th>
+                <th class="text-left"   style="width:8%">Jabatan</th>
+                <th class="text-left"   style="width:5%">Area</th>
                 <th class="text-center" style="width:3%">PTKP</th>
-                <th class="text-right"  style="width:8%">Gaji Pokok</th>
-                <th class="text-right"  style="width:7%">Tunj. Groom</th>
-                <th class="text-right"  style="width:6%">SRP</th>
-                <th class="text-right"  style="width:6%">Grosir</th>
-                <th class="text-right"  style="width:6%">Aksesoris</th>
-                <th class="text-right"  style="width:5%">Bonus</th>
-                <th class="text-right"  style="width:5%">Absensi</th>
-                <th class="text-right"  style="width:5%">Pot. BPJS</th>
-                <th class="text-right"  style="width:5%">PPh 21</th>
-                <th class="text-right"  style="width:7%">Gaji Bruto</th>
-                <th class="text-right"  style="width:8%">Gaji Bersih</th>
+                <th class="text-center" style="width:4%">Status</th>
+                <th class="text-right"  style="width:7%">Gaji Pokok</th>
+                <th class="text-right"  style="width:6%">Tunj. Groom</th>
+                <th class="text-right"  style="width:5%">SRP</th>
+                <th class="text-right"  style="width:5%">Grosir</th>
+                <th class="text-right"  style="width:5%">Aksesoris</th>
+                <th class="text-right"  style="width:4%">Bonus</th>
+                <th class="text-right"  style="width:4%">Lainnya</th>
+                <th class="text-right"  style="width:4%">Absensi</th>
+                <th class="text-right"  style="width:4%">Pot. BPJS</th>
+                <th class="text-right"  style="width:4%">PPh 21</th>
+                <th class="text-right"  style="width:6%">Gaji Bruto</th>
+                <th class="text-right"  style="width:7%">Gaji Bersih</th>
             </tr>
         </thead>
         <tbody>
             @php
-                $totalGajiPokok  = 0;
-                $totalGroom      = 0;
-                $totalSrp        = 0;
-                $totalGrosir     = 0;
-                $totalAkses      = 0;
-                $totalBonus      = 0;
-                $totalAbsensi    = 0;
-                $totalBpjs       = 0;
-                $totalPph        = 0;
-                $totalFixBruto   = 0;
-                $totalGajiB      = 0;
-                $rowCount        = count($aggregated);
+                $totalGajiPokok        = 0;
+                $totalGroom            = 0;
+                $totalSrp              = 0;
+                $totalGrosir           = 0;
+                $totalAkses            = 0;
+                $totalBonus            = 0;
+                $totalPendapatanLainnya= 0;
+                $totalAbsensi          = 0;
+                $totalBpjs             = 0;
+                $totalPph              = 0;
+                $totalFixBruto         = 0;
+                $totalGajiB            = 0;
+                $rowCount              = count($aggregated);
             @endphp
             @forelse ($aggregated as $i => $agg)
                 @php
@@ -312,17 +333,18 @@
                     $isLast   = ($rowNum === $rowCount);
                     $isRowTen = ($rowNum % 10 === 0);
 
-                    $totalGajiPokok  += $agg['gajiPokok'];
-                    $totalGroom      += $agg['nilaiGroom'];
-                    $totalSrp        += $agg['nilaiSrp'];
-                    $totalGrosir     += $agg['nilaiGrosir'];
-                    $totalAkses      += $agg['nilaiAkses'];
-                    $totalBonus      += $agg['bonus'];
-                    $totalAbsensi    += $agg['nilaiAbsensi'];
-                    $totalBpjs       += $agg['bpjsPotongan'];
-                    $totalPph        += $agg['pph'];
-                    $totalFixBruto   += $agg['fixBruto'];
-                    $totalGajiB      += $agg['gajiB'];
+                    $totalGajiPokok        += $agg['gajiPokok'];
+                    $totalGroom            += $agg['nilaiGroom'];
+                    $totalSrp              += $agg['nilaiSrp'];
+                    $totalGrosir           += $agg['nilaiGrosir'];
+                    $totalAkses            += $agg['nilaiAkses'];
+                    $totalBonus            += $agg['bonus'];
+                    $totalPendapatanLainnya+= $agg['pendapatanLainnya'] ?? 0;
+                    $totalAbsensi          += $agg['nilaiAbsensi'];
+                    $totalBpjs             += $agg['bpjsPotongan'];
+                    $totalPph              += $agg['pph'];
+                    $totalFixBruto         += $agg['fixBruto'];
+                    $totalGajiB            += $agg['gajiB'];
                 @endphp
                 <tr>
                     <td class="text-center">{{ $rowNum }}</td>
@@ -331,6 +353,13 @@
                     <td class="text-left">{{ $emp->jabatan->nama ?? '-' }}</td>
                     <td class="text-left">{{ $emp->area->nama ?? '-' }}</td>
                     <td class="text-center">{{ $emp->ptkpStatus->status ?? '-' }}</td>
+                    <td class="text-center">
+                        @if (($emp->status_karyawan ?? 'tetap') === 'tetap')
+                            <span class="badge-tetap">Tetap</span>
+                        @else
+                            <span class="badge-tidak-tetap">Tdk Tetap</span>
+                        @endif
+                    </td>
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($agg['gajiPokok'], 0, ',', '.') }}</span>
                         <span class="calc-formula">{{ $agg['totalHadir'] }} hr &times; {{ number_format($agg['rateHarian'], 0, ',', '.') }}</span>
@@ -364,6 +393,7 @@
                         @endif
                     </td>
                     <td class="text-right">Rp {{ number_format($agg['bonus'], 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($agg['pendapatanLainnya'] ?? 0, 0, ',', '.') }}</td>
                     <td class="text-right" style="color:#b45309;">
                         <span class="calc-result">Rp {{ number_format($agg['nilaiAbsensi'], 0, ',', '.') }}</span>
                         <span class="calc-formula">{{ $agg['rawAbsensi'] }} hr</span>
@@ -390,41 +420,44 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width:2%">No</th>
-                        <th class="text-left"   style="width:12%">Nama Karyawan</th>
+                        <th class="text-left"   style="width:11%">Nama Karyawan</th>
                         <th class="text-center" style="width:5%">NIK</th>
-                        <th class="text-left"   style="width:9%">Jabatan</th>
-                        <th class="text-left"   style="width:6%">Area</th>
+                        <th class="text-left"   style="width:8%">Jabatan</th>
+                        <th class="text-left"   style="width:5%">Area</th>
                         <th class="text-center" style="width:3%">PTKP</th>
-                        <th class="text-right"  style="width:8%">Gaji Pokok</th>
-                        <th class="text-right"  style="width:7%">Tunj. Groom</th>
-                        <th class="text-right"  style="width:6%">SRP</th>
-                        <th class="text-right"  style="width:6%">Grosir</th>
-                        <th class="text-right"  style="width:6%">Aksesoris</th>
-                        <th class="text-right"  style="width:5%">Bonus</th>
-                        <th class="text-right"  style="width:5%">Absensi</th>
-                        <th class="text-right"  style="width:5%">Pot. BPJS</th>
-                        <th class="text-right"  style="width:5%">PPh 21</th>
-                        <th class="text-right"  style="width:7%">Gaji Bruto</th>
-                        <th class="text-right"  style="width:8%">Gaji Bersih</th>
+                        <th class="text-center" style="width:4%">Status</th>
+                        <th class="text-right"  style="width:7%">Gaji Pokok</th>
+                        <th class="text-right"  style="width:6%">Tunj. Groom</th>
+                        <th class="text-right"  style="width:5%">SRP</th>
+                        <th class="text-right"  style="width:5%">Grosir</th>
+                        <th class="text-right"  style="width:5%">Aksesoris</th>
+                        <th class="text-right"  style="width:4%">Bonus</th>
+                        <th class="text-right"  style="width:4%">Lainnya</th>
+                        <th class="text-right"  style="width:4%">Absensi</th>
+                        <th class="text-right"  style="width:4%">Pot. BPJS</th>
+                        <th class="text-right"  style="width:4%">PPh 21</th>
+                        <th class="text-right"  style="width:6%">Gaji Bruto</th>
+                        <th class="text-right"  style="width:7%">Gaji Bersih</th>
                     </tr>
                 </thead>
                 <tbody>
                 @endif
             @empty
-                <tr><td colspan="17" class="text-center" style="padding: 20px; color: #aaa;">Tidak ada data kinerja.</td></tr>
+                <tr><td colspan="19" class="text-center" style="padding: 20px; color: #aaa;">Tidak ada data kinerja.</td></tr>
             @endforelse
         </tbody>
         @if (count($aggregated) > 0)
         @php $totalPotongan = $totalBpjs + $totalPph; @endphp
         <tfoot>
             <tr class="tfoot-komponen">
-                <td colspan="6" class="label-cell">Total per Komponen</td>
+                <td colspan="7" class="label-cell">Total per Komponen</td>
                 <td class="text-right">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalGroom, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalSrp, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalGrosir, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalAkses, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalBonus, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalPendapatanLainnya, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalAbsensi, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalBpjs, 0, ',', '.') }}</td>
                 <td class="text-right potongan">Rp {{ number_format($totalPph, 0, ',', '.') }}</td>
@@ -432,8 +465,8 @@
                 <td class="text-right">-</td>
             </tr>
             <tr class="tfoot-total">
-                <td colspan="6" class="label-cell">Ringkasan Total</td>
-                <td colspan="7" class="text-right bruto-cell">
+                <td colspan="7" class="label-cell">Ringkasan Total</td>
+                <td colspan="8" class="text-right bruto-cell">
                     <span style="font-size: 7.5px; font-weight: normal; display: block; text-transform: uppercase; color: #4b5563; margin-bottom: 2px;">Total Bruto</span>
                     Rp {{ number_format($totalFixBruto, 0, ',', '.') }}
                 </td>

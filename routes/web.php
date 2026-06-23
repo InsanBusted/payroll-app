@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/areas/{area}', [AreaController::class, 'update'])->name('areas.update');
     Route::delete('/areas/{area}', [AreaController::class, 'destroy'])->name('areas.destroy');
 
+    
     // Setting Gaji
     Route::get('/setting-gaji', [App\Http\Controllers\SettingGajiController::class, 'index'])->name('setting_gaji.index');
     Route::put('/setting-gaji/{settingGaji}', [App\Http\Controllers\SettingGajiController::class, 'update'])->name('setting_gaji.update');

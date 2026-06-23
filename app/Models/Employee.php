@@ -19,6 +19,7 @@ class Employee extends Model
         'join_date',
         'ptkp_status_id',
         'ptkp_17_status_id',
+        'status_karyawan',
     ];
 
     protected static function booted()

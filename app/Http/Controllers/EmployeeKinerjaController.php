@@ -119,6 +119,7 @@ class EmployeeKinerjaController extends Controller
             'grosir'          => 'required|integer|min:0',
             'aksesoris'       => 'required|integer|min:0',
             'bonus'           => 'nullable|integer|min:0',
+            'pendapatan_lainnya' => 'nullable|integer|min:0',
             'bpjstk'          => 'nullable|integer|min:0',
             'absensi'         => 'nullable|integer|min:0',
             'pph21'           => 'nullable|integer|min:0',
@@ -133,6 +134,7 @@ class EmployeeKinerjaController extends Controller
             'grosir'          => $request->grosir,
             'aksesoris'       => $request->aksesoris,
             'bonus'           => $request->bonus ?? 0,
+            'pendapatan_lainnya' => $request->pendapatan_lainnya ?? 0,
             'bpjstk'          => $request->bpjstk ?? 0,
             'absensi'         => $request->absensi ?? 0,
             'pph21'           => $request->pph21 ?? 0,
@@ -160,6 +162,7 @@ class EmployeeKinerjaController extends Controller
             'grosir'          => 'required|integer|min:0',
             'aksesoris'       => 'required|integer|min:0',
             'bonus'           => 'nullable|integer|min:0',
+            'pendapatan_lainnya' => 'nullable|integer|min:0',
             'bpjstk'          => 'nullable|integer|min:0',
             'absensi'         => 'nullable|integer|min:0',
             'pph21'           => 'nullable|integer|min:0',
@@ -174,6 +177,7 @@ class EmployeeKinerjaController extends Controller
             'grosir'          => $request->grosir,
             'aksesoris'       => $request->aksesoris,
             'bonus'           => $request->bonus ?? 0,
+            'pendapatan_lainnya' => $request->pendapatan_lainnya ?? 0,
             'bpjstk'          => $request->bpjstk ?? 0,
             'absensi'         => $request->absensi ?? 0,
             'pph21'           => $request->pph21 ?? 0,
@@ -218,7 +222,21 @@ class EmployeeKinerjaController extends Controller
         ]);
 
         $import = new EmployeeKinerjaImport($request->periode);
-        Excel::import($import, $request->file('file'));
+
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = [];
+            foreach ($failures as $failure) {
+                $errorMessages[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            }
+            return redirect()->route('kinerjas.index')
+                ->with('import_error', 'Import gagal karena error validasi: ' . implode(' | ', array_slice($errorMessages, 0, 5)));
+        } catch (\Exception $e) {
+            return redirect()->route('kinerjas.index')
+                ->with('import_error', 'Import gagal: ' . $e->getMessage());
+        }
 
         // Auto-create rekap periode jika belum ada (jangan reset is_approved jika sudah ada)
         RekapPeriode::firstOrCreate(
@@ -231,7 +249,7 @@ class EmployeeKinerjaController extends Controller
         if (!empty($import->errors)) {
             $errorList = implode(' | ', array_slice($import->errors, 0, 5));
             return redirect()->route('kinerjas.index')
-                ->with('warning', $msg . ' Peringatan: ' . $errorList);
+                ->with('import_error', $msg . ' Peringatan: ' . $errorList);
         }
 
         return redirect()->route('kinerjas.index')->with('success', $msg);
@@ -370,7 +388,7 @@ class EmployeeKinerjaController extends Controller
                 $pph   = $row->hitungListPph21($employeeId);
                 $gajiB = $row->hitungGajiDiterimaList();
 
-            $bruto    = $gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus;
+            $bruto    = $gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus + ($row->pendapatan_lainnya ?? 0);
             $fixBruto = $bruto - $nilaiAbsensi;
 
             // Raw quantities for formula display
@@ -380,60 +398,62 @@ class EmployeeKinerjaController extends Controller
 
             if (!isset($aggregatedMap[$employeeId])) {
                 $aggregatedMap[$employeeId] = [
-                    'employee'      => $row->employee,
-                    'isSales'       => $isSales,
-                    'gajiPokok'     => 0,
-                    'nilaiGroom'    => 0,
-                    'nilaiSrp'      => 0,
-                    'nilaiGrosir'   => 0,
-                    'nilaiAkses'    => 0,
-                    'bonus'         => 0,
-                    'nilaiAbsensi'  => 0,
-                    'bpjsPotongan'  => 0,
-                    'pph'           => 0,
-                    'fixBruto'      => 0,
-                    'gajiB'         => 0,
+                    'employee'          => $row->employee,
+                    'isSales'           => $isSales,
+                    'gajiPokok'         => 0,
+                    'nilaiGroom'        => 0,
+                    'nilaiSrp'          => 0,
+                    'nilaiGrosir'       => 0,
+                    'nilaiAkses'        => 0,
+                    'bonus'             => 0,
+                    'pendapatanLainnya' => 0,
+                    'nilaiAbsensi'      => 0,
+                    'bpjsPotongan'      => 0,
+                    'pph'               => 0,
+                    'fixBruto'          => 0,
+                    'gajiB'             => 0,
                     // Raw quantities (summed) for formula display
-                    'totalHadir'    => 0,
-                    'rawGroom'      => 0,
-                    'rawSrp'        => 0,
-                    'rawGrosir'     => 0,
-                    'rawAkses'      => 0,
-                    'rawAbsensi'    => 0,
+                    'totalHadir'        => 0,
+                    'rawGroom'          => 0,
+                    'rawSrp'            => 0,
+                    'rawGrosir'         => 0,
+                    'rawAkses'          => 0,
+                    'rawAbsensi'        => 0,
                     // Rates (last row wins — rates rarely change mid-period)
-                    'rateHarian'    => $rateHarian,
-                    'rateGroom'     => $rateGroom,
-                    'rateSrp'       => $rateSrp,
-                    'rateGrosir'    => $rateGrosir,
-                    'rateAkses'     => $rateAkses,
+                    'rateHarian'        => $rateHarian,
+                    'rateGroom'         => $rateGroom,
+                    'rateSrp'           => $rateSrp,
+                    'rateGrosir'        => $rateGrosir,
+                    'rateAkses'         => $rateAkses,
                 ];
             }
 
 
-            $aggregatedMap[$employeeId]['gajiPokok']    += $gajiPokok;
-            $aggregatedMap[$employeeId]['nilaiGroom']   += $nilaiGroom;
-            $aggregatedMap[$employeeId]['nilaiSrp']     += $nilaiSrp;
-            $aggregatedMap[$employeeId]['nilaiGrosir']  += $nilaiGrosir;
-            $aggregatedMap[$employeeId]['nilaiAkses']   += $nilaiAkses;
-            $aggregatedMap[$employeeId]['bonus']        += $row->bonus;
-            $aggregatedMap[$employeeId]['nilaiAbsensi'] += $nilaiAbsensi;
-            $aggregatedMap[$employeeId]['bpjsPotongan'] += $bpjsPotongan;
-            $aggregatedMap[$employeeId]['pph']          += $pph;
-            $aggregatedMap[$employeeId]['fixBruto']     += $fixBruto;
-            $aggregatedMap[$employeeId]['gajiB']        += $gajiB;
+            $aggregatedMap[$employeeId]['gajiPokok']        += $gajiPokok;
+            $aggregatedMap[$employeeId]['nilaiGroom']        += $nilaiGroom;
+            $aggregatedMap[$employeeId]['nilaiSrp']         += $nilaiSrp;
+            $aggregatedMap[$employeeId]['nilaiGrosir']       += $nilaiGrosir;
+            $aggregatedMap[$employeeId]['nilaiAkses']        += $nilaiAkses;
+            $aggregatedMap[$employeeId]['bonus']             += $row->bonus;
+            $aggregatedMap[$employeeId]['pendapatanLainnya'] += ($row->pendapatan_lainnya ?? 0);
+            $aggregatedMap[$employeeId]['nilaiAbsensi']      += $nilaiAbsensi;
+            $aggregatedMap[$employeeId]['bpjsPotongan']      += $bpjsPotongan;
+            $aggregatedMap[$employeeId]['pph']               += $pph;
+            $aggregatedMap[$employeeId]['fixBruto']          += $fixBruto;
+            $aggregatedMap[$employeeId]['gajiB']             += $gajiB;
             // Sum raw quantities
-            $aggregatedMap[$employeeId]['totalHadir']   += $row->total_hadir;
-            $aggregatedMap[$employeeId]['rawGroom']     += $row->tunjangan_groom;
-            $aggregatedMap[$employeeId]['rawSrp']       += $row->srp;
-            $aggregatedMap[$employeeId]['rawGrosir']    += $row->grosir;
-            $aggregatedMap[$employeeId]['rawAkses']     += $row->aksesoris;
-            $aggregatedMap[$employeeId]['rawAbsensi']   += $row->absensi;
+            $aggregatedMap[$employeeId]['totalHadir']        += $row->total_hadir;
+            $aggregatedMap[$employeeId]['rawGroom']          += $row->tunjangan_groom;
+            $aggregatedMap[$employeeId]['rawSrp']            += $row->srp;
+            $aggregatedMap[$employeeId]['rawGrosir']         += $row->grosir;
+            $aggregatedMap[$employeeId]['rawAkses']          += $row->aksesoris;
+            $aggregatedMap[$employeeId]['rawAbsensi']        += $row->absensi;
             // Update rates to last row
-            $aggregatedMap[$employeeId]['rateHarian']    = $rateHarian;
-            $aggregatedMap[$employeeId]['rateGroom']     = $rateGroom;
-            $aggregatedMap[$employeeId]['rateSrp']       = $rateSrp;
-            $aggregatedMap[$employeeId]['rateGrosir']    = $rateGrosir;
-            $aggregatedMap[$employeeId]['rateAkses']     = $rateAkses;
+            $aggregatedMap[$employeeId]['rateHarian']         = $rateHarian;
+            $aggregatedMap[$employeeId]['rateGroom']          = $rateGroom;
+            $aggregatedMap[$employeeId]['rateSrp']            = $rateSrp;
+            $aggregatedMap[$employeeId]['rateGrosir']         = $rateGrosir;
+            $aggregatedMap[$employeeId]['rateAkses']          = $rateAkses;
         }
 
         $aggregated = array_values($aggregatedMap);

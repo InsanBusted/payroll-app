@@ -27,6 +27,21 @@
                 class="ml-auto text-amber-400 hover:text-amber-700">&times;</button>
         </div>
     @endif
+    @if (session('import_error'))
+        <div id="flash-import-error"
+            class="mb-4 flex items-start gap-3 bg-red-50 border border-red-300 text-red-800 text-sm rounded-xl px-4 py-3">
+            <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <div class="flex-1">
+                <p class="font-semibold mb-1">⚠️ Error Import Excel</p>
+                <p>{{ session('import_error') }}</p>
+            </div>
+            <button onclick="document.getElementById('flash-import-error').remove()"
+                class="ml-auto text-red-400 hover:text-red-700">&times;</button>
+        </div>
+    @endif
     @if ($errors->any())
         <div
             class="mb-4 flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">
@@ -360,7 +375,7 @@
                                 </a>
                                 @if (auth()->user()->role->name === 'finance')
                                     <button
-                                        onclick="openEditModal({{ $k->id }}, '{{ $k->employee_id }}', '{{ $k->periode }}', {{ $k->total_hadir }}, {{ $k->tunjangan_groom }}, {{ $k->srp }}, {{ $k->grosir }}, {{ $k->aksesoris }}, {{ $k->bonus }}, {{ $k->bpjstk }}, {{ $k->absensi }}, {{ $k->pph21 }})"
+                                        onclick="openEditModal({{ $k->id }}, '{{ $k->employee_id }}', '{{ $k->periode }}', {{ $k->total_hadir }}, {{ $k->tunjangan_groom }}, {{ $k->srp }}, {{ $k->grosir }}, {{ $k->aksesoris }}, {{ $k->bonus }}, {{ $k->pendapatan_lainnya ?? 0 }}, {{ $k->bpjstk }}, {{ $k->absensi }}, {{ $k->pph21 }})"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100 transition-colors">
                                         Edit
                                     </button>
@@ -483,6 +498,12 @@
                                 <input type="number" name="bonus" min="0" value="{{ old('bonus', 0) }}"
                                     class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
                             </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Pendapatan Lainnya
+                                    (Rp)</label>
+                                <input type="number" name="pendapatan_lainnya" min="0" value="{{ old('pendapatan_lainnya', 0) }}"
+                                    class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                            </div>
                         </div>
                     </div>
 
@@ -571,6 +592,10 @@
                                     class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
                             <div><label class="block text-xs font-semibold text-slate-700 mb-1">Bonus
                                     Nominal</label><input type="number" id="e_bonus" name="bonus"
+                                    min="0"
+                                    class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">Pendapatan
+                                    Lainnya (Rp)</label><input type="number" id="e_lainnya" name="pendapatan_lainnya"
                                     min="0"
                                     class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
                         </div>
@@ -662,7 +687,7 @@
             if (e.target === m) closeModal(m.id);
         }));
 
-        function openEditModal(id, empId, periode, hadir, groom, srp, grosir, akses, bonus, absensi, pph21) {
+        function openEditModal(id, empId, periode, hadir, groom, srp, grosir, akses, bonus, lainnya, absensi, pph21) {
             document.getElementById('edit-form').action = '/kinerjas/' + id;
             document.getElementById('e_employee').value = empId;
             document.getElementById('e_periode').value = periode;
@@ -672,6 +697,7 @@
             document.getElementById('e_grosir').value = grosir;
             document.getElementById('e_aksesoris').value = akses;
             document.getElementById('e_bonus').value = bonus;
+            document.getElementById('e_lainnya').value = lainnya;
             document.getElementById('e_absensi').value = absensi;
             document.getElementById('e_pph21').value = pph21;
             openModal('edit-modal');

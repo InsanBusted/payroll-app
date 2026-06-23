@@ -20,6 +20,7 @@ class EmployeeKinerja extends Model
         'grosir',
         'aksesoris',
         'bonus',
+        'pendapatan_lainnya',
         'bpjstk',
         'absensi',
         'pph21',
@@ -120,7 +121,8 @@ class EmployeeKinerja extends Model
             + $valueSrp
             + $valueGrosir
             + $valueAksesoris
-            + $this->bonus;
+            + $this->bonus
+            + ($this->pendapatan_lainnya ?? 0);
 
         $total = $gajiTotal - $potonganAbsensi;
 
@@ -366,6 +368,7 @@ class EmployeeKinerja extends Model
                 'grosir'              => $isSales ? $this->grosir * $rateGrosir : 0,
                 'aksesoris'           => $isSales ? $this->aksesoris * $rateAksesoris : 0,
                 'bonus'               => $this->bonus,
+                'pendapatan_lainnya'  => $this->pendapatan_lainnya ?? 0,
             ],
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),
@@ -410,6 +413,7 @@ class EmployeeKinerja extends Model
                 'grosir'              => $isSales ? $this->grosir * $rateGrosir : 0,
                 'aksesoris'           => $isSales ? $this->aksesoris * $rateAksesoris : 0,
                 'bonus'               => $this->bonus,
+                'pendapatan_lainnya'  => $this->pendapatan_lainnya ?? 0,
             ],
             'potongan' => [
                 'bpjstk'  => $this->hitungPotonganBpjstk($setting),

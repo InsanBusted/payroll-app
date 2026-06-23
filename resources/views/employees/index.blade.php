@@ -59,6 +59,7 @@
                         <th class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">Karyawan</th>
                         <th class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">Jabatan</th>
                         <th class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">Area</th>
+                        <th class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">Status</th>
                         <th class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">Tanggal Join</th>
                         <th class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">PTKP</th>
                         <th class="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-6 py-3">PTKP 2017</th>
@@ -94,6 +95,13 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">{{ $emp->area->nama }}</span>
                             @else
                                 <span class="text-slate-400 text-xs">—</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            @if (($emp->status_karyawan ?? 'tetap') === 'tetap')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-700">Tetap</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Tidak Tetap</span>
                             @endif
                         </td>
                         <td class="px-6 py-4">
@@ -139,7 +147,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap">
-                            <button onclick="openEditModal({{ $emp->id }},'{{ addslashes($emp->nik) }}','{{ addslashes($emp->nama) }}','{{ $emp->join_date }}','{{ $emp->jabatan_id }}','{{ $emp->area_id }}','{{ $emp->ptkp_status_id }}','{{ $emp->ptkp_17_status_id }}','{{ addslashes($emp->no_rek_bank ?? '') }}','{{ addslashes($emp->nama_bank ?? '') }}','{{ $emp->user_id }}','{{ $emp->signature_path }}')"
+                            <button onclick="openEditModal({{ $emp->id }},'{{ addslashes($emp->nik) }}','{{ addslashes($emp->nama) }}','{{ $emp->join_date }}','{{ $emp->jabatan_id }}','{{ $emp->area_id }}','{{ $emp->ptkp_status_id }}','{{ $emp->ptkp_17_status_id }}','{{ addslashes($emp->no_rek_bank ?? '') }}','{{ addslashes($emp->nama_bank ?? '') }}','{{ $emp->user_id }}','{{ $emp->signature_path }}','{{ $emp->status_karyawan ?? 'tetap' }}')"
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Edit
@@ -223,6 +231,13 @@
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">Tanggal Join</label>
                         <input type="date" name="join_date" value="{{ old('join_date') }}"
                                class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Status Karyawan</label>
+                        <select name="status_karyawan" class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                            <option value="tetap" {{ old('status_karyawan', 'tetap') == 'tetap' ? 'selected' : '' }}>Pegawai Tetap</option>
+                            <option value="tidak_tetap" {{ old('status_karyawan') == 'tidak_tetap' ? 'selected' : '' }}>Pegawai Tidak Tetap</option>
+                        </select>
                     </div>
                 </div>
 
@@ -329,6 +344,13 @@
                         <input id="e-join-date" type="date" name="join_date"
                                class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
                     </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Status Karyawan</label>
+                        <select id="e-status-karyawan" name="status_karyawan" class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
+                            <option value="tetap">Pegawai Tetap</option>
+                            <option value="tidak_tetap">Pegawai Tidak Tetap</option>
+                        </select>
+                    </div>
                 </div>
 
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2 mb-4 mt-2">Informasi Bank</p>
@@ -381,7 +403,7 @@
         function openModal(id)  { document.getElementById(id).classList.remove('opacity-0','pointer-events-none'); }
         function closeModal(id) { document.getElementById(id).classList.add('opacity-0','pointer-events-none'); }
         document.querySelectorAll('[id$="-modal"]').forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); }));
-        function openEditModal(id,nik,nama,joinDate,jabatanId,areaId,ptkpId,ptkp17Id,noRek,namaBank,userId,sigPath){
+        function openEditModal(id,nik,nama,joinDate,jabatanId,areaId,ptkpId,ptkp17Id,noRek,namaBank,userId,sigPath,statusKaryawan){
             document.getElementById('edit-form').action='/employees/'+id;
             document.getElementById('e-nik').value=nik;
             document.getElementById('e-nama').value=nama;
@@ -393,6 +415,7 @@
             document.getElementById('e-rek').value=noRek;
             document.getElementById('e-bank').value=namaBank;
             document.getElementById('e-user').value=userId;
+            document.getElementById('e-status-karyawan').value=statusKaryawan||'tetap';
             const prev=document.getElementById('e-sig-preview');
             const img=document.getElementById('e-sig-img');
             if(sigPath){ img.src='/storage/'+sigPath; prev.classList.remove('hidden'); }

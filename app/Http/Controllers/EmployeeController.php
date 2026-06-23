@@ -54,10 +54,11 @@ class EmployeeController extends Controller
             'nama_bank'      => 'nullable|string|max:50',
             'user_id'        => 'nullable|exists:users,id|unique:employees,user_id',
             'signature_path' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'status_karyawan'=> 'nullable|in:tetap,tidak_tetap',
         ]);
 
-        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'ptkp_17_status_id', 'no_rek_bank', 'nama_bank', 'user_id']);
-
+        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'ptkp_17_status_id', 'no_rek_bank', 'nama_bank', 'user_id', 'status_karyawan']);
+        $data['status_karyawan'] = $request->input('status_karyawan', 'tetap');
 
         if ($request->hasFile('signature_path')) {
             $data['signature_path'] = $request->file('signature_path')
@@ -84,9 +85,11 @@ class EmployeeController extends Controller
             'nama_bank'      => 'nullable|string|max:50',
             'user_id'        => ['nullable', 'exists:users,id', Rule::unique('employees')->ignore($employee->id)],
             'signature_path' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'status_karyawan'=> 'nullable|in:tetap,tidak_tetap',
         ]);
 
-        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'ptkp_17_status_id', 'no_rek_bank', 'nama_bank', 'user_id']);
+        $data = $request->only(['nik', 'nama', 'join_date', 'jabatan_id', 'area_id', 'ptkp_status_id', 'ptkp_17_status_id', 'no_rek_bank', 'nama_bank', 'user_id', 'status_karyawan']);
+        $data['status_karyawan'] = $request->input('status_karyawan', 'tetap');
 
         if ($request->hasFile('signature_path')) {
             // Delete old signature if exists
