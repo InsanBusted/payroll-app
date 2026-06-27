@@ -114,6 +114,7 @@ class EmployeeKinerjaController extends Controller
                 }),
             ],
             'total_hadir'     => 'required|integer|min:0',
+            'lembur'          => 'nullable|integer|min:0',
             'tunjangan_groom' => 'required|integer|min:0',
             'srp'             => 'required|integer|min:0',
             'grosir'          => 'required|integer|min:0',
@@ -126,18 +127,19 @@ class EmployeeKinerjaController extends Controller
         ]);
 
         EmployeeKinerja::create([
-            'employee_id'     => $request->employee_id,
-            'periode'         => $request->periode,
-            'total_hadir'     => $request->total_hadir,
-            'tunjangan_groom' => $request->tunjangan_groom,
-            'srp'             => $request->srp,
-            'grosir'          => $request->grosir,
-            'aksesoris'       => $request->aksesoris,
-            'bonus'           => $request->bonus ?? 0,
+            'employee_id'        => $request->employee_id,
+            'periode'            => $request->periode,
+            'total_hadir'        => $request->total_hadir,
+            'lembur'             => $request->lembur ?? 0,
+            'tunjangan_groom'    => $request->tunjangan_groom,
+            'srp'                => $request->srp,
+            'grosir'             => $request->grosir,
+            'aksesoris'          => $request->aksesoris,
+            'bonus'              => $request->bonus ?? 0,
             'pendapatan_lainnya' => $request->pendapatan_lainnya ?? 0,
-            'bpjstk'          => $request->bpjstk ?? 0,
-            'absensi'         => $request->absensi ?? 0,
-            'pph21'           => $request->pph21 ?? 0,
+            'bpjstk'             => $request->bpjstk ?? 0,
+            'absensi'            => $request->absensi ?? 0,
+            'pph21'              => $request->pph21 ?? 0,
         ]);
 
         return back()->with('success', 'Data kinerja berhasil ditambahkan.');
@@ -157,6 +159,7 @@ class EmployeeKinerjaController extends Controller
                 })->ignore($kinerja->id),
             ],
             'total_hadir'     => 'required|integer|min:0',
+            'lembur'          => 'nullable|integer|min:0',
             'tunjangan_groom' => 'required|integer|min:0',
             'srp'             => 'required|integer|min:0',
             'grosir'          => 'required|integer|min:0',
@@ -169,18 +172,19 @@ class EmployeeKinerjaController extends Controller
         ]);
 
         $kinerja->update([
-            'employee_id'     => $request->employee_id,
-            'periode'         => $request->periode,
-            'total_hadir'     => $request->total_hadir,
-            'tunjangan_groom' => $request->tunjangan_groom,
-            'srp'             => $request->srp,
-            'grosir'          => $request->grosir,
-            'aksesoris'       => $request->aksesoris,
-            'bonus'           => $request->bonus ?? 0,
+            'employee_id'        => $request->employee_id,
+            'periode'            => $request->periode,
+            'total_hadir'        => $request->total_hadir,
+            'lembur'             => $request->lembur ?? 0,
+            'tunjangan_groom'    => $request->tunjangan_groom,
+            'srp'                => $request->srp,
+            'grosir'             => $request->grosir,
+            'aksesoris'          => $request->aksesoris,
+            'bonus'              => $request->bonus ?? 0,
             'pendapatan_lainnya' => $request->pendapatan_lainnya ?? 0,
-            'bpjstk'          => $request->bpjstk ?? 0,
-            'absensi'         => $request->absensi ?? 0,
-            'pph21'           => $request->pph21 ?? 0,
+            'bpjstk'             => $request->bpjstk ?? 0,
+            'absensi'            => $request->absensi ?? 0,
+            'pph21'              => $request->pph21 ?? 0,
         ]);
 
         return back()->with('success', 'Data kinerja berhasil diperbarui.');
@@ -355,7 +359,9 @@ class EmployeeKinerjaController extends Controller
         foreach ($rawKinerjas as $row) {
             $employeeId  = $row->employee_id;
             $rateHarian  = $row->rate_gaji_pokok ?? ($row->employee->jabatan->rate_gaji_pokok ?? 0);
+            $rateLembur  = $row->rate_lembur ?? ($row->employee->jabatan->rate_lembur ?? 0);
             $gajiPokok   = $row->total_hadir * $rateHarian;
+            $nilaiLembur = ($row->lembur ?? 0) * $rateLembur;
 
             $rateGroom   = $row->rate_tunjangan_groom ?? ($setting->rate_tunjangan_groom ?? 0);
             $rateSrp     = $row->rate_srp ?? ($setting->rate_srp ?? 0);
@@ -375,20 +381,10 @@ class EmployeeKinerjaController extends Controller
             $bpjsPotongan = $rincian['potongan']['bpjstk'] ?? 0;
             $nilaiAbsensi = $rincian['potongan']['absensi'] ?? 0;
 
-            // Per-row December detection
-            // $isDesember = str_ends_with($row->periode ?? '', '-12');
-            // if ($isDesember) {
-            //     $pph   = $row->hitunglistPph21Desember($employeeId);
-            //     $gajiB = $row->hitungGajiDiterimaListPph21Des();
-            // } else {
-            //     $pph   = $row->hitungListPph21($employeeId);
-            //     $gajiB = $row->hitungGajiDiterimaList();
-            // }
-
                 $pph   = $row->hitungListPph21($employeeId);
                 $gajiB = $row->hitungGajiDiterimaList();
 
-            $bruto    = $gajiPokok + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus + ($row->pendapatan_lainnya ?? 0);
+            $bruto    = $gajiPokok + $nilaiLembur + $nilaiGroom + $nilaiSrp + $nilaiGrosir + $nilaiAkses + $row->bonus + ($row->pendapatan_lainnya ?? 0);
             $fixBruto = $bruto - $nilaiAbsensi;
 
             // Raw quantities for formula display
@@ -401,6 +397,7 @@ class EmployeeKinerjaController extends Controller
                     'employee'          => $row->employee,
                     'isSales'           => $isSales,
                     'gajiPokok'         => 0,
+                    'nilaiLembur'       => 0,
                     'nilaiGroom'        => 0,
                     'nilaiSrp'          => 0,
                     'nilaiGrosir'       => 0,
@@ -414,6 +411,7 @@ class EmployeeKinerjaController extends Controller
                     'gajiB'             => 0,
                     // Raw quantities (summed) for formula display
                     'totalHadir'        => 0,
+                    'rawLembur'         => 0,
                     'rawGroom'          => 0,
                     'rawSrp'            => 0,
                     'rawGrosir'         => 0,
@@ -421,6 +419,7 @@ class EmployeeKinerjaController extends Controller
                     'rawAbsensi'        => 0,
                     // Rates (last row wins — rates rarely change mid-period)
                     'rateHarian'        => $rateHarian,
+                    'rateLembur'        => $rateLembur,
                     'rateGroom'         => $rateGroom,
                     'rateSrp'           => $rateSrp,
                     'rateGrosir'        => $rateGrosir,
@@ -430,6 +429,7 @@ class EmployeeKinerjaController extends Controller
 
 
             $aggregatedMap[$employeeId]['gajiPokok']        += $gajiPokok;
+            $aggregatedMap[$employeeId]['nilaiLembur']       += $nilaiLembur;
             $aggregatedMap[$employeeId]['nilaiGroom']        += $nilaiGroom;
             $aggregatedMap[$employeeId]['nilaiSrp']         += $nilaiSrp;
             $aggregatedMap[$employeeId]['nilaiGrosir']       += $nilaiGrosir;
@@ -443,6 +443,7 @@ class EmployeeKinerjaController extends Controller
             $aggregatedMap[$employeeId]['gajiB']             += $gajiB;
             // Sum raw quantities
             $aggregatedMap[$employeeId]['totalHadir']        += $row->total_hadir;
+            $aggregatedMap[$employeeId]['rawLembur']         += ($row->lembur ?? 0);
             $aggregatedMap[$employeeId]['rawGroom']          += $row->tunjangan_groom;
             $aggregatedMap[$employeeId]['rawSrp']            += $row->srp;
             $aggregatedMap[$employeeId]['rawGrosir']         += $row->grosir;
@@ -450,6 +451,7 @@ class EmployeeKinerjaController extends Controller
             $aggregatedMap[$employeeId]['rawAbsensi']        += $row->absensi;
             // Update rates to last row
             $aggregatedMap[$employeeId]['rateHarian']         = $rateHarian;
+            $aggregatedMap[$employeeId]['rateLembur']         = $rateLembur;
             $aggregatedMap[$employeeId]['rateGroom']          = $rateGroom;
             $aggregatedMap[$employeeId]['rateSrp']            = $rateSrp;
             $aggregatedMap[$employeeId]['rateGrosir']         = $rateGrosir;

@@ -89,17 +89,19 @@ class GajiSheetImport implements ToCollection, WithHeadingRow
 
             // ── Simpan / update data kinerja ──
             $data = [
-                'employee_id'     => $employee->id,
-                'periode'         => $this->periode,
-                'total_hadir'     => (int) ($row['total_hadir'] ?? 0),
-                'tunjangan_groom' => (int) ($row['tunj_groom']  ?? $row['tunj__groom'] ?? 0),
-                'srp'             => (int) ($row['srp']          ?? 0),
-                'grosir'          => (int) ($row['grosir']       ?? 0),
-                'aksesoris'       => (int) ($row['aksesoris']    ?? 0),
-                'bonus'           => (int) ($row['bonus']        ?? 0),
-                'bpjstk'          => 0,
-                'absensi'         => (int) ($row['absensi']      ?? 0),
-                'pph21'           => 0,
+                'employee_id'        => $employee->id,
+                'periode'            => $this->periode,
+                'total_hadir'        => (int) ($row['total_hadir']      ?? 0),
+                'lembur'             => (int) ($row['lemburjam'] ?? $row['lembur_jam'] ?? $row['lembur'] ?? 0),
+                'tunjangan_groom'    => (int) ($row['tunj_groom']        ?? $row['tunj__groom'] ?? 0),
+                'srp'                => (int) ($row['srp']               ?? 0),
+                'grosir'             => (int) ($row['grosir']            ?? 0),
+                'aksesoris'          => (int) ($row['aksesoris']         ?? 0),
+                'bonus'              => (int) ($row['bonus']             ?? 0),
+                'pendapatan_lainnya' => (int) ($row['pendapatan_lainnya'] ?? 0),
+                'bpjstk'             => 0,
+                'absensi'            => (int) ($row['absensi_hari']      ?? $row['absensi'] ?? 0),
+                'pph21'              => 0,
             ];
 
             $existing = EmployeeKinerja::query()

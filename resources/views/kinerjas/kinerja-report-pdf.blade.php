@@ -289,29 +289,31 @@
         <thead>
             <tr>
                 <th class="text-center" style="width:2%">No</th>
-                <th class="text-left"   style="width:11%">Nama Karyawan</th>
+                <th class="text-left"   style="width:10%">Nama Karyawan</th>
                 <th class="text-center" style="width:5%">NIK</th>
-                <th class="text-left"   style="width:8%">Jabatan</th>
+                <th class="text-left"   style="width:7%">Jabatan</th>
                 <th class="text-left"   style="width:5%">Area</th>
                 <th class="text-center" style="width:3%">PTKP</th>
                 <th class="text-center" style="width:4%">Status</th>
-                <th class="text-right"  style="width:7%">Gaji Pokok</th>
-                <th class="text-right"  style="width:6%">Tunj. Groom</th>
-                <th class="text-right"  style="width:5%">SRP</th>
-                <th class="text-right"  style="width:5%">Grosir</th>
-                <th class="text-right"  style="width:5%">Aksesoris</th>
+                <th class="text-right"  style="width:6%">Gaji Pokok</th>
+                <th class="text-right"  style="width:4%">Lembur</th>
+                <th class="text-right"  style="width:5%">Tunj. Groom</th>
+                <th class="text-right"  style="width:4%">SRP</th>
+                <th class="text-right"  style="width:4%">Grosir</th>
+                <th class="text-right"  style="width:4%">Aksesoris</th>
                 <th class="text-right"  style="width:4%">Bonus</th>
                 <th class="text-right"  style="width:4%">Lainnya</th>
                 <th class="text-right"  style="width:4%">Absensi</th>
                 <th class="text-right"  style="width:4%">Pot. BPJS</th>
                 <th class="text-right"  style="width:4%">PPh 21</th>
-                <th class="text-right"  style="width:6%">Gaji Bruto</th>
-                <th class="text-right"  style="width:7%">Gaji Bersih</th>
+                <th class="text-right"  style="width:5%">Bruto</th>
+                <th class="text-right"  style="width:6%">Gaji Bersih</th>
             </tr>
         </thead>
         <tbody>
             @php
                 $totalGajiPokok        = 0;
+                $totalLembur           = 0;
                 $totalGroom            = 0;
                 $totalSrp              = 0;
                 $totalGrosir           = 0;
@@ -334,6 +336,7 @@
                     $isRowTen = ($rowNum % 10 === 0);
 
                     $totalGajiPokok        += $agg['gajiPokok'];
+                    $totalLembur           += $agg['nilaiLembur'] ?? 0;
                     $totalGroom            += $agg['nilaiGroom'];
                     $totalSrp              += $agg['nilaiSrp'];
                     $totalGrosir           += $agg['nilaiGrosir'];
@@ -363,6 +366,14 @@
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($agg['gajiPokok'], 0, ',', '.') }}</span>
                         <span class="calc-formula">{{ $agg['totalHadir'] }} hr &times; {{ number_format($agg['rateHarian'], 0, ',', '.') }}</span>
+                    </td>
+                    <td class="text-right">
+                        @if (($agg['nilaiLembur'] ?? 0) > 0)
+                            <span class="calc-result">Rp {{ number_format($agg['nilaiLembur'], 0, ',', '.') }}</span>
+                            <span class="calc-formula">{{ $agg['rawLembur'] ?? 0 }} jam &times; {{ number_format($agg['rateLembur'] ?? 0, 0, ',', '.') }}</span>
+                        @else
+                            <span class="na-text">-</span>
+                        @endif
                     </td>
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($agg['nilaiGroom'], 0, ',', '.') }}</span>
@@ -420,24 +431,25 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width:2%">No</th>
-                        <th class="text-left"   style="width:11%">Nama Karyawan</th>
+                        <th class="text-left"   style="width:10%">Nama Karyawan</th>
                         <th class="text-center" style="width:5%">NIK</th>
-                        <th class="text-left"   style="width:8%">Jabatan</th>
+                        <th class="text-left"   style="width:7%">Jabatan</th>
                         <th class="text-left"   style="width:5%">Area</th>
                         <th class="text-center" style="width:3%">PTKP</th>
                         <th class="text-center" style="width:4%">Status</th>
-                        <th class="text-right"  style="width:7%">Gaji Pokok</th>
-                        <th class="text-right"  style="width:6%">Tunj. Groom</th>
-                        <th class="text-right"  style="width:5%">SRP</th>
-                        <th class="text-right"  style="width:5%">Grosir</th>
-                        <th class="text-right"  style="width:5%">Aksesoris</th>
+                        <th class="text-right"  style="width:6%">Gaji Pokok</th>
+                        <th class="text-right"  style="width:4%">Lembur</th>
+                        <th class="text-right"  style="width:5%">Tunj. Groom</th>
+                        <th class="text-right"  style="width:4%">SRP</th>
+                        <th class="text-right"  style="width:4%">Grosir</th>
+                        <th class="text-right"  style="width:4%">Aksesoris</th>
                         <th class="text-right"  style="width:4%">Bonus</th>
                         <th class="text-right"  style="width:4%">Lainnya</th>
                         <th class="text-right"  style="width:4%">Absensi</th>
                         <th class="text-right"  style="width:4%">Pot. BPJS</th>
                         <th class="text-right"  style="width:4%">PPh 21</th>
-                        <th class="text-right"  style="width:6%">Gaji Bruto</th>
-                        <th class="text-right"  style="width:7%">Gaji Bersih</th>
+                        <th class="text-right"  style="width:5%">Bruto</th>
+                        <th class="text-right"  style="width:6%">Gaji Bersih</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -452,6 +464,7 @@
             <tr class="tfoot-komponen">
                 <td colspan="7" class="label-cell">Total per Komponen</td>
                 <td class="text-right">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</td>
+                <td class="text-right">Rp {{ number_format($totalLembur, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalGroom, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalSrp, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalGrosir, 0, ',', '.') }}</td>

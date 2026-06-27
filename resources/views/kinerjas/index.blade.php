@@ -375,7 +375,7 @@
                                 </a>
                                 @if (auth()->user()->role->name === 'finance')
                                     <button
-                                        onclick="openEditModal({{ $k->id }}, '{{ $k->employee_id }}', '{{ $k->periode }}', {{ $k->total_hadir }}, {{ $k->tunjangan_groom }}, {{ $k->srp }}, {{ $k->grosir }}, {{ $k->aksesoris }}, {{ $k->bonus }}, {{ $k->pendapatan_lainnya ?? 0 }}, {{ $k->bpjstk }}, {{ $k->absensi }}, {{ $k->pph21 }})"
+                                        onclick="openEditModal({{ $k->id }}, '{{ $k->employee_id }}', '{{ $k->periode }}', {{ $k->total_hadir }}, {{ $k->lembur ?? 0 }}, {{ $k->tunjangan_groom }}, {{ $k->srp }}, {{ $k->grosir }}, {{ $k->aksesoris }}, {{ $k->bonus }}, {{ $k->pendapatan_lainnya ?? 0 }}, {{ $k->bpjstk }}, {{ $k->absensi }}, {{ $k->pph21 }})"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100 transition-colors">
                                         Edit
                                     </button>
@@ -465,6 +465,13 @@
                                     (Hari)</label>
                                 <input type="number" name="total_hadir" required min="0"
                                     value="{{ old('total_hadir', 0) }}"
+                                    class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Lembur
+                                    (Jam)</label>
+                                <input type="number" name="lembur" min="0"
+                                    value="{{ old('lembur', 0) }}"
                                     class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
                             </div>
                             <div>
@@ -573,6 +580,10 @@
                         <div class="space-y-4">
                             <div><label class="block text-xs font-semibold text-slate-700 mb-1">Total
                                     Hadir</label><input type="number" id="e_hadir" name="total_hadir" required
+                                    min="0"
+                                    class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1">Jam Lembur
+                                    (Jam)</label><input type="number" id="e_lembur" name="lembur"
                                     min="0"
                                     class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"></div>
                             <div><label class="block text-xs font-semibold text-slate-700 mb-1">Point Tunj.
@@ -687,11 +698,12 @@
             if (e.target === m) closeModal(m.id);
         }));
 
-        function openEditModal(id, empId, periode, hadir, groom, srp, grosir, akses, bonus, lainnya, absensi, pph21) {
+        function openEditModal(id, empId, periode, hadir, lembur, groom, srp, grosir, akses, bonus, lainnya, absensi, pph21) {
             document.getElementById('edit-form').action = '/kinerjas/' + id;
             document.getElementById('e_employee').value = empId;
             document.getElementById('e_periode').value = periode;
             document.getElementById('e_hadir').value = hadir;
+            document.getElementById('e_lembur').value = lembur;
             document.getElementById('e_groom').value = groom;
             document.getElementById('e_srp').value = srp;
             document.getElementById('e_grosir').value = grosir;

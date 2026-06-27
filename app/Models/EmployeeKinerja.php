@@ -15,6 +15,7 @@ class EmployeeKinerja extends Model
         'employee_id',
         'periode',
         'total_hadir',
+        'lembur',
         'tunjangan_groom',
         'srp',
         'grosir',
@@ -28,6 +29,7 @@ class EmployeeKinerja extends Model
         'transferred_by',
         'status_diterima',
         'rate_gaji_pokok',
+        'rate_lembur',
         'rate_tunjangan_groom',
         'rate_srp',
         'rate_grosir',
@@ -68,6 +70,9 @@ class EmployeeKinerja extends Model
             if ($kinerja->rate_gaji_pokok === null && $employee && $employee->jabatan) {
                 $kinerja->rate_gaji_pokok = $employee->jabatan->rate_gaji_pokok;
             }
+            if ($kinerja->rate_lembur === null && $employee && $employee->jabatan) {
+                $kinerja->rate_lembur = $employee->jabatan->rate_lembur ?? 0;
+            }
         });
     }
 
@@ -94,7 +99,8 @@ class EmployeeKinerja extends Model
 
         // Use stored rates if available, otherwise fallback to current settings
         $rateGajiPokok = $this->rate_gaji_pokok ?? $employee->jabatan->rate_gaji_pokok;
-        
+        $rateLembur    = $this->rate_lembur ?? $employee->jabatan->rate_lembur ?? 0;
+
         $setting = null;
         if ($this->rate_tunjangan_groom === null) {
             $setting = SettingGaji::first();
@@ -110,6 +116,7 @@ class EmployeeKinerja extends Model
                 || stripos($employee->jabatan->nama, 'kepala toko') !== false;
 
         $gajiPokok          = $this->total_hadir * $rateGajiPokok;
+        $nilaiLembur        = ($this->lembur ?? 0) * $rateLembur;
         $tunjanganKerapihan = $this->tunjangan_groom * $rateTunjanganGroom;
         $valueSrp           = $isSales ? $this->srp * $rateSrp : 0;
         $valueGrosir        = $isSales ? $this->grosir * $rateGrosir : 0;
@@ -117,6 +124,7 @@ class EmployeeKinerja extends Model
         $potonganAbsensi    = $this->absensi * $potonganAbsensiRate;
 
         $gajiTotal = $gajiPokok
+            + $nilaiLembur
             + $tunjanganKerapihan
             + $valueSrp
             + $valueGrosir
@@ -126,11 +134,6 @@ class EmployeeKinerja extends Model
 
         $total = $gajiTotal - $potonganAbsensi;
 
-            // dd([
-            //     'gaji total: ' => $gajiTotal,
-            //     'potongan absensi: ' => $potonganAbsensi,
-            //     'total bruto: ' => $total
-            // ]);
         return $total;
     }
 
@@ -351,6 +354,7 @@ class EmployeeKinerja extends Model
         }
 
         $rateGajiPokok      = $this->rate_gaji_pokok ?? ($employee->jabatan->rate_gaji_pokok ?? 0);
+        $rateLembur         = $this->rate_lembur ?? ($employee->jabatan->rate_lembur ?? 0);
         $rateTunjanganGroom = $this->rate_tunjangan_groom ?? ($setting ? $setting->rate_tunjangan_groom : 0);
         $rateSrp            = $this->rate_srp ?? ($setting ? $setting->rate_srp : 0);
         $rateGrosir         = $this->rate_grosir ?? ($setting ? $setting->rate_grosir : 0);
@@ -363,6 +367,7 @@ class EmployeeKinerja extends Model
         return [
             'pendapatan' => [
                 'gaji_pokok'          => $this->total_hadir * $rateGajiPokok,
+                'lembur'              => ($this->lembur ?? 0) * $rateLembur,
                 'tunjangan_kerapihan' => $this->tunjangan_groom * $rateTunjanganGroom,
                 'srp'                 => $isSales ? $this->srp * $rateSrp : 0,
                 'grosir'              => $isSales ? $this->grosir * $rateGrosir : 0,
@@ -394,6 +399,7 @@ class EmployeeKinerja extends Model
         }
 
         $rateGajiPokok      = $this->rate_gaji_pokok ?? ($employee->jabatan->rate_gaji_pokok ?? 0);
+        $rateLembur         = $this->rate_lembur ?? ($employee->jabatan->rate_lembur ?? 0);
         $rateTunjanganGroom = $this->rate_tunjangan_groom ?? ($setting ? $setting->rate_tunjangan_groom : 0);
         $rateSrp            = $this->rate_srp ?? ($setting ? $setting->rate_srp : 0);
         $rateGrosir         = $this->rate_grosir ?? ($setting ? $setting->rate_grosir : 0);
@@ -408,6 +414,7 @@ class EmployeeKinerja extends Model
         return [
             'pendapatan' => [
                 'gaji_pokok'          => $this->total_hadir * $rateGajiPokok,
+                'lembur'              => ($this->lembur ?? 0) * $rateLembur,
                 'tunjangan_kerapihan' => $this->tunjangan_groom * $rateTunjanganGroom,
                 'srp'                 => $isSales ? $this->srp * $rateSrp : 0,
                 'grosir'              => $isSales ? $this->grosir * $rateGrosir : 0,
