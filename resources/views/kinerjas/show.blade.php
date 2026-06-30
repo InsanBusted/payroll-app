@@ -194,6 +194,7 @@
                                 'grosir' => 'Nilai Grosir',
                                 'aksesoris' => 'Nilai Aksesoris',
                                 'bonus' => 'Bonus',
+                                'pendapatan_lainnya' => 'Pendapatan Lainnya',
                             ];
                         @endphp
                         <div class="divide-y divide-slate-100">
@@ -293,7 +294,7 @@
                 Download PDF
             </a>
             <button
-                onclick="openEditFromDetail({{ $kinerja->id }}, '{{ $kinerja->employee_id }}', '{{ $kinerja->periode }}', {{ $kinerja->total_hadir }}, {{ $kinerja->tunjangan_groom }}, {{ $kinerja->srp }}, {{ $kinerja->grosir }}, {{ $kinerja->aksesoris }}, {{ $kinerja->bonus }}, {{ $kinerja->bpjstk }}, {{ $kinerja->absensi }}, {{ $kinerja->pph21 }})"
+                onclick="openEditFromDetail({{ $kinerja->id }}, '{{ $kinerja->employee_id }}', '{{ $kinerja->periode }}', {{ $kinerja->total_hadir }}, {{ $kinerja->tunjangan_groom }}, {{ $kinerja->srp }}, {{ $kinerja->grosir }}, {{ $kinerja->aksesoris }}, {{ $kinerja->bonus }}, {{ $kinerja->bpjstk }}, {{ $kinerja->absensi }}, {{ $kinerja->pph21 }}, {{ $kinerja->pendapatan_lainnya ?? 0 }})"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100 transition-colors">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -374,6 +375,7 @@
                                     ['id' => 'ed_grosir', 'name' => 'grosir', 'label' => 'Point Grosir'],
                                     ['id' => 'ed_aksesoris', 'name' => 'aksesoris', 'label' => 'Point Aksesoris'],
                                     ['id' => 'ed_bonus', 'name' => 'bonus', 'label' => 'Bonus Nominal (Rp)'],
+                                    ['id' => 'ed_pendapatan_lainnya', 'name' => 'pendapatan_lainnya', 'label' => 'Pendapatan Lainnya (Rp)'],
                                 ];
                             @endphp
                             @foreach ($incomeFields as $f)
@@ -427,7 +429,7 @@
     </div>
 
     <script>
-        function openEditFromDetail(id, empId, periode, hadir, groom, srp, grosir, akses, bonus, bpjstk, absensi, pph21) {
+        function openEditFromDetail(id, empId, periode, hadir, groom, srp, grosir, akses, bonus, bpjstk, absensi, pph21, pendapatanLainnya) {
             document.getElementById('edit-form-detail').action = '/kinerjas/' + id;
             document.getElementById('ed_employee').value = empId;
             document.getElementById('ed_periode').value = periode;
@@ -439,6 +441,7 @@
             document.getElementById('ed_bonus').value = bonus;
             document.getElementById('ed_absensi').value = absensi;
             document.getElementById('ed_pph21').value = pph21;
+            document.getElementById('ed_pendapatan_lainnya').value = pendapatanLainnya;
             const modal = document.getElementById('edit-modal-detail');
             modal.classList.remove('opacity-0', 'pointer-events-none');
         }

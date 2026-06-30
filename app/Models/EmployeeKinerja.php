@@ -134,7 +134,7 @@ class EmployeeKinerja extends Model
 
         $total = $gajiTotal - $potonganAbsensi;
 
-        return $total;
+        return $gajiTotal;
     }
 
     // untuk hitung total pph21
@@ -158,6 +158,12 @@ class EmployeeKinerja extends Model
                     ->orWhereNull('max_salary');
             })
             ->first();
+
+//             dd([
+//     'hasilAkhir' => $hasilAkhir,
+//     'category_id' => $employee->ptkpStatus?->category_id,
+//     'rate' => $rate
+// ]);
 
         return (int) ($hasilAkhir * ($rate?->rate / 100));
     }
@@ -189,10 +195,17 @@ class EmployeeKinerja extends Model
                     ->orWhereNull('max_salary');
             })
             ->first();
-
+//             dd([
+//     'hasilAkhir' => $hasilAkhir,
+//     'category_id' => $employee->ptkpStatus?->category_id,
+//     'rate' => $rate
+// ]);
+            
         if (!$rate) {
             return 0;
         }
+
+
 
         return $hasilAkhir * ($rate->rate / 100);
     }
@@ -263,9 +276,24 @@ class EmployeeKinerja extends Model
      */
     public function hitungTotalPotongan(): int
     {
-        $potonganPph21 = $this->hitungTotalPph21();
 
-        return $this->hitungPotonganBpjstk() + $potonganPph21;
+        $potonganPph21 = $this->hitungListPph21($this->employee_id);
+
+        // potongan absensi
+        $setting = SettingGaji::first();
+        $potonganAbsensiRate = $this->potongan_absensi ?? ($setting ? $setting->potongan_absensi : 0);
+        $potonganAbsensi    = $this->absensi * $potonganAbsensiRate;
+
+        $totalPotongan = $this->hitungPotonganBpjstk() + $potonganPph21 + $potonganAbsensi;
+        // dd($potonganPph21);
+    //     dd([
+    //     'pph21' => $this->hitungTotalPph21(),
+    //     'employee_id' => $this->employee_id,
+    //     'employee_relation' => $this->employee
+    // ]);
+
+
+        return $totalPotongan;
     }
 
     /**

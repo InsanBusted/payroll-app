@@ -294,7 +294,7 @@
                 <th class="text-left"   style="width:7%">Jabatan</th>
                 <th class="text-left"   style="width:5%">Area</th>
                 <th class="text-center" style="width:3%">PTKP</th>
-                <th class="text-center" style="width:4%">Status</th>
+                <!-- <th class="text-center" style="width:4%">Status</th> -->
                 <th class="text-right"  style="width:6%">Gaji Pokok</th>
                 <th class="text-right"  style="width:4%">Lembur</th>
                 <th class="text-right"  style="width:5%">Tunj. Groom</th>
@@ -356,13 +356,13 @@
                     <td class="text-left">{{ $emp->jabatan->nama ?? '-' }}</td>
                     <td class="text-left">{{ $emp->area->nama ?? '-' }}</td>
                     <td class="text-center">{{ $emp->ptkpStatus->status ?? '-' }}</td>
-                    <td class="text-center">
+                    <!-- <td class="text-center">
                         @if (($emp->status_karyawan ?? 'tetap') === 'tetap')
                             <span class="badge-tetap">Tetap</span>
                         @else
                             <span class="badge-tidak-tetap">Tdk Tetap</span>
                         @endif
-                    </td>
+                    </td> -->
                     <td class="text-right">
                         <span class="calc-result">Rp {{ number_format($agg['gajiPokok'], 0, ',', '.') }}</span>
                         <span class="calc-formula">{{ $agg['totalHadir'] }} hr &times; {{ number_format($agg['rateHarian'], 0, ',', '.') }}</span>
@@ -436,7 +436,7 @@
                         <th class="text-left"   style="width:7%">Jabatan</th>
                         <th class="text-left"   style="width:5%">Area</th>
                         <th class="text-center" style="width:3%">PTKP</th>
-                        <th class="text-center" style="width:4%">Status</th>
+                        <!-- <th class="text-center" style="width:4%">Status</th> -->
                         <th class="text-right"  style="width:6%">Gaji Pokok</th>
                         <th class="text-right"  style="width:4%">Lembur</th>
                         <th class="text-right"  style="width:5%">Tunj. Groom</th>
