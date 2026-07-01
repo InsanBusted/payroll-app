@@ -293,6 +293,11 @@
         <td>
             <div class="sig-role">Diterima oleh,</div>
             <div class="signature-box">
+
+            @php
+    $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
+    dd($signature, file_exists($signature));
+@endphp
                @php
             $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
         @endphp
