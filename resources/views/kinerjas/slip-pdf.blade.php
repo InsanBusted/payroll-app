@@ -280,21 +280,23 @@
         @if ($kinerja->status_gaji)
         <td>
             <div class="sig-role">Dikeluarkan oleh,</div>
-             <div class="signature-box">
+            <div class="signature-box">
+                @php
+    $hrdSignatureBase64 = null;
 
-           @php
-                $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
-                $base64 = null;
+    $hrdSignaturePath = $kinerja->transferredBy?->employee->signature_path
+        ? '/home/mmtpayro/public_html/storage/' . $kinerja->transferredBy->employee->signature_path
+        : null;
 
-                if (file_exists($signature)) {
-                    $type = pathinfo($signature, PATHINFO_EXTENSION);
-                    $data = file_get_contents($signature);
-                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                }
-            @endphp
+    if ($hrdSignaturePath && file_exists($hrdSignaturePath)) {
+        $type = pathinfo($hrdSignaturePath, PATHINFO_EXTENSION);
+        $data = file_get_contents($hrdSignaturePath);
+        $hrdSignatureBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+@endphp
 
-@if($base64)
-    <img src="{{ $base64 }}" alt="TTD HRD" style="width:120px;">
+@if ($hrdSignatureBase64)
+    <img src="{{ $hrdSignatureBase64 }}" alt="TTD HRD">
 @endif
             </div>
             <div class="signature-line">{{ $kinerja->transferredBy->name ?? auth()->user()->name }}</div>
