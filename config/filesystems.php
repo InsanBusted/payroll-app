@@ -48,11 +48,11 @@ return [
         // ],
 
         'public' => [
-    'driver' => 'local',
-    'root' => '/home/mmtpayro/public_html/storage',
-    'url' => env('APP_URL').'/storage',
-    'visibility' => 'public',
-],
+                'driver' => 'local',
+                'root' => '/home/mmtpayro/public_html/storage',
+                'url' => env('APP_URL').'/storage',
+                'visibility' => 'public',
+        ],
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -80,7 +80,7 @@ return [
     */
 
     'links' => [
-        public_path('/home/mmtpayro/public_html/storage') => storage_path('/home/mmtpayro/public_html'),
+        public_path('storage') => storage_path('app/public'),
     ],
 
 ];
