@@ -294,17 +294,20 @@
             <div class="sig-role">Diterima oleh,</div>
             <div class="signature-box">
 
-            @php
+           @php
     $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
-    dd($signature, file_exists($signature));
-@endphp
-               @php
-            $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
-        @endphp
+    $base64 = null;
 
-        @if ($kinerja->employee->signature_path && file_exists($signature))
-            <img src="{{ $signature }}" alt="TTD Karyawan">
-        @endif
+    if (file_exists($signature)) {
+        $type = pathinfo($signature, PATHINFO_EXTENSION);
+        $data = file_get_contents($signature);
+        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+@endphp
+
+@if($base64)
+    <img src="{{ $base64 }}" alt="TTD" style="width:120px;">
+@endif
             </div>
             <div class="signature-line">{{ $kinerja->employee->nama }}</div>
             <div style="font-size:10px;color:#555;margin-top:2px;">{{ $kinerja->employee?->jabatan?->nama ?? 'Karyawan' }}</div>
