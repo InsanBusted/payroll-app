@@ -80,7 +80,7 @@ class StaffKinerjaController extends Controller
         ])->where('employee_id', $employee?->id)
             ->findOrFail($id);
         
-            dd($kinerja);
+            // dd($kinerja);
 
         $rincian = $kinerja->rincianGaji();
 

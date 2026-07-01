@@ -293,9 +293,13 @@
         <td>
             <div class="sig-role">Diterima oleh,</div>
             <div class="signature-box">
-                @if ($kinerja->employee->signature_path)
-                    <img src="{{ '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path }}" alt="TTD Karyawan">
-                @endif
+               @php
+            $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
+        @endphp
+
+        @if ($kinerja->employee->signature_path && file_exists($signature))
+            <img src="{{ $signature }}" alt="TTD Karyawan">
+        @endif
             </div>
             <div class="signature-line">{{ $kinerja->employee->nama }}</div>
             <div style="font-size:10px;color:#555;margin-top:2px;">{{ $kinerja->employee?->jabatan?->nama ?? 'Karyawan' }}</div>
