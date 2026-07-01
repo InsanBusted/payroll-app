@@ -308,8 +308,11 @@ class EmployeeKinerja extends Model
     public function hitungGajiDiterimaList(): int
     {
         $employeeId = $this->employee->id;
+         $setting = SettingGaji::first();
+        $potonganAbsensiRate = $this->potongan_absensi ?? ($setting ? $setting->potongan_absensi : 0);
+        $potonganAbsensi    = $this->absensi * $potonganAbsensiRate;
 
-        $gaji = $this->hitungTotalPendapatan() - ($this->hitungPotonganBpjstk() + $this->hitunglistPph21($employeeId));
+        $gaji = $this->hitungTotalPendapatan() - $this->hitungTotalPotongan();
         // dd([
         //     'gaji : ' => $gaji,
         //     'total pendapatan : ' => $this->hitungTotalPendapatan(),
