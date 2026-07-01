@@ -282,7 +282,7 @@
             <div class="sig-role">Dikeluarkan oleh,</div>
             <div class="signature-box">
                 @if ($kinerja->transferredBy?->employee->signature_path)
-                    <img src="{{ asset('storage/' . $kinerja->transferredBy?->employee->signature_path) }}" alt="TTD HRD">
+                    <img src="{{ public_path('storage/' . $kinerja->transferredBy?->employee->signature_path) }}" alt="TTD HRD">
                 @endif
             </div>
             <div class="signature-line">{{ $kinerja->transferredBy->name ?? auth()->user()->name }}</div>
@@ -294,7 +294,7 @@
             <div class="sig-role">Diterima oleh,</div>
             <div class="signature-box">
                 @if ($kinerja->employee->signature_path)
-                    <img src="{{ asset('storage/' . $kinerja->employee->signature_path) }}" alt="TTD Karyawan">
+                    <img src="{{ public_path('storage/' . $kinerja->employee->signature_path) }}" alt="TTD Karyawan">
                 @endif
             </div>
             <div class="signature-line">{{ $kinerja->employee->nama }}</div>
