@@ -280,10 +280,22 @@
         @if ($kinerja->status_gaji)
         <td>
             <div class="sig-role">Dikeluarkan oleh,</div>
-            <div class="signature-box">
-                @if ($kinerja->transferredBy?->employee->signature_path)
-                    <img src="{{ '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path }}" alt="TTD HRD">
-                @endif
+             <div class="signature-box">
+
+           @php
+                $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
+                $base64 = null;
+
+                if (file_exists($signature)) {
+                    $type = pathinfo($signature, PATHINFO_EXTENSION);
+                    $data = file_get_contents($signature);
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                }
+            @endphp
+
+@if($base64)
+    <img src="{{ $base64 }}" alt="TTD HRD" style="width:120px;">
+@endif
             </div>
             <div class="signature-line">{{ $kinerja->transferredBy->name ?? auth()->user()->name }}</div>
             <div style="font-size:10px;color:#555;margin-top:2px;">{{ $kinerja->transferredBy?->employee?->jabatan?->nama ?? 'HRD / Admin' }}</div>
@@ -295,15 +307,15 @@
             <div class="signature-box">
 
            @php
-    $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
-    $base64 = null;
+                $signature = '/home/mmtpayro/public_html/storage/' . $kinerja->employee->signature_path;
+                $base64 = null;
 
-    if (file_exists($signature)) {
-        $type = pathinfo($signature, PATHINFO_EXTENSION);
-        $data = file_get_contents($signature);
-        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-    }
-@endphp
+                if (file_exists($signature)) {
+                    $type = pathinfo($signature, PATHINFO_EXTENSION);
+                    $data = file_get_contents($signature);
+                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                }
+            @endphp
 
 @if($base64)
     <img src="{{ $base64 }}" alt="TTD" style="width:120px;">
