@@ -181,12 +181,18 @@ class EmployeeKinerja extends Model
             return 0;
         }
 
+        $potonganAbsensiRate = $this->potongan_absensi ?? ($setting ? $setting->potongan_absensi : 0);
+        $potonganAbsensi    = $this->absensi * $potonganAbsensiRate;
+        // dd($potonganAbsensi);
+
         $employee = Employee::with('ptkpStatus')->find($employeeId);
         if (!$employee || !$employee->ptkpStatus) {
             return 0;
         }
+        
     
-        $hasilAkhir = $this->hitungTotalPendapatan();
+        $hasilAkhir = $this->hitungTotalPendapatan() - $potonganAbsensi;
+        // dd($hasilAkhir)
         $rate = TerRate::query()
             ->where('category_id', $employee->ptkpStatus->category_id)
             ->where('min_salary', '<=', $hasilAkhir)
