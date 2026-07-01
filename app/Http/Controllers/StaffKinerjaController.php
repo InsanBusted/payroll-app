@@ -79,6 +79,8 @@ class StaffKinerjaController extends Controller
             'employee.ptkpStatus',
         ])->where('employee_id', $employee?->id)
             ->findOrFail($id);
+        
+            dd($kinerja);
 
         $rincian = $kinerja->rincianGaji();
 
