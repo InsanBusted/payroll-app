@@ -462,7 +462,7 @@
         @php $totalPotongan = $totalBpjs + $totalPph; @endphp
         <tfoot>
             <tr class="tfoot-komponen">
-                <td colspan="7" class="label-cell">Total per Komponen</td>
+                <td colspan="6" class="label-cell">Total per Komponen</td>
                 <td class="text-right">Rp {{ number_format($totalGajiPokok, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalLembur, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($totalGroom, 0, ',', '.') }}</td>
