@@ -211,6 +211,9 @@ class EmployeeKinerjaController extends Controller
 
         EmployeeKinerja::where('periode', $request->periode)->delete();
 
+        // Hapus juga dari rekap_periodes agar tidak muncul di menu approval
+        RekapPeriode::where('periode', $request->periode)->delete();
+
         return back()->with('success', "Berhasil menghapus {$count} data kinerja pada periode {$request->periode}.");
     }
 
